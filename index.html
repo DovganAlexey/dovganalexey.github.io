@@ -1,29 +1,139 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My First Website</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            text-align: center;
-            padding: 100px 20px;
-        }
-
-        h1 {
-            color: #24292f;
-        }
-
-        p {
-            color: #555;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d0e">
+  <meta name="description" content="Alex made this — a collection of interactive experiments, games, and ideas.">
+  <title>Alex made this</title>
+  <link rel="stylesheet" href="portfolio.css">
+  <script src="portfolio.js" defer></script>
 </head>
 <body>
-    <h1>Hello World!</h1>
-    <p>My website is hosted for free on GitHub Pages.</p>
+  <div class="noise" aria-hidden="true"></div>
+  <main id="top">
+    <section class="hero">
+      <div class="hero-orb orb-one"></div><div class="hero-orb orb-two"></div>
+      <div class="hero-content">
+        <div class="eyebrow reveal"><span class="eyebrow-dot"></span> PERSONAL PROJECTS / DIGITAL PLAYGROUND</div>
+        <h1 class="reveal">Alex<span class="lime">...made...this</span></h1>
+      </div>
+      <div class="hero-side-note">INDEPENDENTLY MADE<br>WITH A LITTLE HELP</div>
+    </section>
+
+    <section class="work-section" id="work">
+      <div class="section-top reveal">
+        <div><div class="eyebrow">THE THINGS I’VE MADE</div></div>
+        <p class="section-note">Four projects.<br>Four different rabbit holes.</p>
+      </div>
+
+      <div class="project-list">
+        <a class="project project-platform reveal" href="Platform/index.html">
+          <div class="project-art platform-art">
+            <video class="platform-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true"><source src="Platform/video.webm" type="video/webm"></video>
+            <div class="art-shade"></div>
+            <div class="art-kicker">01 / GAME DEVELOPMENT</div>
+            <div class="platform-stamp">NOVA<span>—</span></div>
+            <div class="art-bottom"><span>BUILD WORLDS. TELL STORIES.</span><span class="art-arrow">↗</span></div>
+          </div>
+          <div class="project-info">
+            <div class="project-meta"><span>FRAMEWORK / CONCEPT</span><span>01</span></div>
+            <div class="project-name-row"><h3>Nova-Platform</h3><span class="view-link">Explore project <b>↗</b></span></div>
+            <p>A platform-game development framework: its creative direction, genres, systems, and roadmap.</p>
+          </div>
+        </a>
+
+        <a class="project project-maze reveal" href="Maze Simulator/index.html">
+          <div class="project-art maze-art">
+            <div class="art-kicker">02 / INTERACTIVE GAME</div>
+            <div class="maze-grid" aria-hidden="true">
+              <span></span><span class="wall"></span><span></span><span></span><span></span>
+              <span class="wall"></span><span></span><span class="wall"></span><span></span><span></span>
+              <span></span><span></span><span class="wall"></span><span></span><span class="wall"></span>
+              <span class="wall"></span><span></span><span></span><span></span><span></span>
+              <span></span><span class="wall"></span><span></span><span class="wall"></span><span></span>
+              <img class="maze-player" src="Maze Simulator/player.png" alt="">
+              <img class="maze-door" src="Maze Simulator/door.png" alt="">
+            </div>
+            <div class="maze-coordinate">FIND THE WAY OUT <span>↗</span></div>
+            <div class="art-bottom"><span>THINK AHEAD. FIND A PATH.</span><span class="art-arrow">↗</span></div>
+          </div>
+          <div class="project-info">
+            <div class="project-meta"><span>GAME / D3.JS</span><span>02</span></div>
+            <div class="project-name-row"><h3>Maze Game Simulator</h3><span class="view-link">Explore project <b>↗</b></span></div>
+            <p>A maze to navigate, choices to make, and a little challenge in finding the exit.</p>
+          </div>
+        </a>
+
+        <a class="project project-exit reveal" href="The Last Exit/index.html">
+          <div class="project-art exit-art">
+            <div class="art-kicker">03 / INTERACTIVE MAP</div>
+            <div class="exit-graphic">
+              <svg viewBox="0 0 760 340" role="img" aria-label="Abstract network of connected routes">
+                <defs><filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+                <g class="route route-muted"><path d="M40 270L145 185L235 230L340 92L455 155L555 70L710 125"/><path d="M145 185L180 55L340 92M235 230L300 310L455 155L510 285L710 125"/></g>
+                <g class="route route-bright"><path d="M40 270L145 185L340 92L455 155L555 70L710 125"/></g>
+                <g class="nodes"><circle cx="40" cy="270" r="7"/><circle cx="145" cy="185" r="7"/><circle cx="180" cy="55" r="7"/><circle cx="235" cy="230" r="7"/><circle cx="340" cy="92" r="12"/><circle cx="455" cy="155" r="7"/><circle cx="510" cy="285" r="7"/><circle cx="555" cy="70" r="7"/><circle cx="710" cy="125" r="9"/></g>
+              </svg>
+              <div class="exit-label">THE LAST EXIT <span>MAP / CYCLE 07</span></div>
+            </div>
+            <div class="art-bottom"><span>EVERY PATH LEADS SOMEWHERE.</span><span class="art-arrow">↗</span></div>
+          </div>
+          <div class="project-info">
+            <div class="project-meta"><span>NARRATIVE / SYSTEM MAP</span><span>03</span></div>
+            <div class="project-name-row"><h3>The Last Exit</h3><span class="view-link">Explore project <b>↗</b></span></div>
+            <p>An atmospheric map of cycles, routes, and hidden connections. Explore the system and find your way through.</p>
+          </div>
+        </a>
+
+        <a class="project project-creature reveal" href="Bills Must Be Paid/index.html">
+          <div class="project-art creature-art">
+            <div class="art-kicker">04 / ARCADE CLICKER</div>
+            <div class="creature-stage">
+              <div class="score-chip"><small>YOUR NEXT HIGH SCORE</small><strong>?</strong></div>
+              <img class="horn-img" src="Bills Must Be Paid/horn.png" alt="">
+              <div class="creature-word">CRUSH<br><em>THE SLIME.</em></div>
+              <div class="slime-shape slime-one"></div><div class="slime-shape slime-two"></div><div class="slime-shape slime-three"></div>
+            </div>
+            <div class="art-bottom"><span>CLICK FAST. SCORE BIG.</span><span class="art-arrow">↗</span></div>
+          </div>
+          <div class="project-info">
+            <div class="project-meta"><span>ARCADE / CLICKER GAME</span><span>04</span></div>
+            <div class="project-name-row"><h3>Creature Crusher</h3><span class="view-link">Explore project <b>↗</b></span></div>
+            <p>A chaotic little slime-clicker. Grab the horn, chase the score, and try not to miss.</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <a href="downloads/dump.zip" download class="download-btn">
+    Download
+</a>
+
+<style>
+.download-btn {
+    display: inline-block;
+    padding: 14px 28px;
+    background: #c4f36a;
+    color: #171916;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+    transition: 0.3s ease;
+}
+
+.download-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(196, 243, 106, 0.25);
+}
+</style>
+
+    <a class="footer-brand" href="#top">Alex made this<span>© 2026</span></a>
+  </footer>
+  
+
 </body>
 </html>

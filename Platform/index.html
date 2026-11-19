@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nova-Platform Overview</title>
+    <script src="d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 120px;
+            line-height: 1.6;
+
+        }
+        a:hover {
+    text-decoration: underline;
+}
+    a {
+        color: black;
+        text-decoration: none;
+    }
+        ul {
+            margin-left: 20px;
+        }
+	.chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .chart-container svg {
+            width: 100%;
+            height: auto;
+            max-width: 800px;
+        }
+        svg { 
+            margin: 2px auto;
+            background-color: white; 
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); 
+            transition: all 0.3s ease;
+        }
+        .center-circle { 
+            fill: url(#centerGradient); 
+            stroke: #333; 
+            stroke-width: 2; 
+            filter: drop-shadow(0 0 5px rgba(70, 130, 180, 0.5));
+        }
+        .center-text { 
+            font-size: clamp(50px, 4vw, 40px);
+            font-weight: bold; 
+            fill: white; 
+            text-anchor: middle; 
+            dominant-baseline: central; 
+        }
+        .genre-sector { 
+            stroke: white; 
+            stroke-width: 1.5; 
+            transition: all 0.2s ease;
+        }
+        .genre-sector:hover { 
+            opacity: 0.8; 
+            stroke-width: 2;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.2));
+        }
+        .genre-text { 
+            font-size: clamp(25px, 2.5vw, 25px);
+            fill: #333; 
+            text-anchor: middle; 
+            dominant-baseline: central; 
+            font-weight: 600;
+            pointer-events: none;
+        }
+        #gameModal { 
+            font-size: clamp(25px, 2.5vw, 25px);
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.7); 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 1000; 
+        }
+        #gameModal .modal-content { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 10px; 
+            max-width: 800px;
+            width: 90%; 
+            max-height: 80vh; 
+            overflow-y: auto; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+        .game-25d {
+            color: #0000FF;
+        }
+        .game-3d {
+            color: #e74c3c;
+        }
+        .dimension-icon {
+            width: 16px;
+            height: 16px;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        button {
+    font-size: 1.1em;       /* Larger text */
+    font-weight: bold;      /* Bold text */
+    background-color: blue; /* Blue background */
+    color: white;           /* White text for contrast */
+    border: none;           /* Optional: remove default border */
+    padding: 10px 20px;     /* Optional: add padding */
+    border-radius: 4px;     /* Optional: rounded corners */
+    cursor: pointer;        /* Optional: pointer cursor on hover */
+}
+    </style>
+</head>
+<body>
+
+<a class="portfolio-home-link" href="../index.html" aria-label="Back to project archive">BACK TO ARCHIVE</a>
+<style>
+.portfolio-home-link {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2147483000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 22px 17px 22px 11px;
+
+    background: rgba(15, 23, 42, 0.88);
+    color: #f1f5f9 !important;
+
+    border: 1px solid rgba(140, 150, 150, 0.45);
+    border-left: none;
+    border-radius: 0 50px 50px 0;
+
+    font: 10px Arial, sans-serif;
+    letter-spacing: 0.1em;
+    text-decoration: none !important;
+
+    writing-mode: vertical-rl;
+    white-space: nowrap;
+
+    backdrop-filter: blur(8px);
+    box-shadow: 4px 0 18px rgba(0, 0, 0, 0.2);
+
+    transition: 
+        padding 0.3s ease,
+        background 0.3s ease,
+        color 0.3s ease;
+}
+
+.portfolio-home-link:hover {
+    padding-left: 16px;
+    padding-right: 22px;
+    background: #c4f36a;
+    color: #171916 !important;
+    border-color: #c4f36a;
+}
+
+</style>
+
+<h1 style="text-align: center; margin-top: 0.67em; margin-bottom: 0em;">Nova-Platform</h1>
+<p style="text-align: center; margin-top: 0em; font-size: 20px; margin-bottom : 3em"><strong>Платформа для разработки игр в жанре платформер</strong></p>
+<p>Nova-Platform основанна на <a href="https://www.lwjgl.org/" target="_blank"><strong>LWJGL</strong></a>. Включает в себя кодовую базу: базовые классы, модули, библиотеки и т.п. Направлена на быстрое
+    создание MVP (Minimum Viable Product) прототипов во многих
+    под-жанрах платформера.
+<p>Первый этап разработки предполагает:</p>
+<ul>
+    <li>2D/2.5D платформеры</li>
+    <li>Windows/Linux операционки (с возможным расширением на macOS)</li>
+    <li>Дистрибьюция через Steam и <a href="https://itch.io/" target="_blank"><strong>itch.io</strong></a></li>
+</ul>
+<div class="chart-container ">
+    <p>Возможные под-жанры и примеры успешных игр</p>
+    <svg id="chart"></svg>
+</div>
+
+<div id="gameModal" class="flex">
+    <div class="modal-content">
+        <h2 id="modalTitle" class="text-4xl font-bold mb-4 text-gray-800"></h2>
+        <ul id="gameList"></ul>
+        <button onclick="closeModal()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Close</button>
+    </div>
+</div>
+
+<h2 style=" margin-top : 6em">Монетизационная модель</h2>
+<ul>
+    <li>Платные игры</li>
+    <li>DLC (доп. контент и косметика)</li>
+    <li>Микротранзакции (где возможно)</li>
+</ul>
+
+<h2 style="text-align: center; margin-top : 3em">Этап разработки 1</h2>
+
+<h3>Фаза 1 - "Базовый сайд-скроллер 2D/2.5D платформер"</h3>
+<ul>
+    <li>Базовые уровни</li>
+    <li>Персонаж: движение, гравитация, столкновения</li>
+    <li>Движение камеры</li>
+    <li>Базовая боевая система:
+        <ul>
+            <li>вариации атак на малых дистанциях</li>
+            <li>управление уроном</li>
+        </ul>
+    </li>
+    <li>Базовые звуковые эффекты</li>
+    <li>Базовые враги</li>
+</ul>
+
+<h3>Фаза 2 - "Расширение возможностей персонажа"</h3>
+<ul>
+    <li>Расширение боевой системы:
+        <ul>
+            <li>атаки на расстоянии</li>
+            <li>защитные способности</li>
+            <li>парирование (на рассмотрении)</li>
+        </ul>
+    </li>
+    <li>Расширение возможностей передвижения:
+        <ul>
+            <li>рывок</li>
+            <li>двойной прыжок</li>
+            <li>скольжение по стенам / зависание / лазание / прыжок</li>
+            <li>возможность использовать снаряды или врагов для прыжка</li>
+            <li>На рассмотрении: телепорт, гарпун</li>
+        </ul>
+    </li>
+</ul>
+
+<h3>Фаза 3 – "Окружение"</h3>
+<ul>
+    <li>Редактор уровней</li>
+    <li>Параллакс окружения, анимация</li>
+    <li>Реакции окружающей среды на игровой процесс</li>
+    <li>Улучшение камеры</li>
+    <li>Переход между уровнями</li>
+</ul>
+
+<p style="margin-top: 5em;">Завершение первого этапа разработки открывает возможность для создания коммерческого проекта в релиз. Лучшим кандидатом субъективно считаю повествовательный платформер
+    (Narrative-Driven Platformer).</p>
+<p>В следующих этапах разработки платформы:</p>
+<ul>
+    <li>Система прокачки (для Roguelike/Roguelite/Metroidvania)</li>
+    <li>Мультиплеер (локальный, затем сетевой) для Arena и Action-Multiplayer платформеров</li>
+    <li>Разработка интересных механик</li>
+    <ol>
+        <li><a href="https://store.steampowered.com/app/499180/Braid_Anniversary_Edition/" target="_blank"><strong>Braid</strong></a></li>
+        <li><a href="https://store.steampowered.com/app/1796220/Laika_Aged_Through_Blood/" target="_blank"><strong>Laika: Aged Through Blood</strong></a></li>
+        <li><a href="https://store.steampowered.com/app/1928690/Bionic_Bay/" target="_blank"><strong>Bionic Bay</strong></a></li>
+        <li><a href="https://store.steampowered.com/app/252110/Lovers_in_a_Dangerous_Spacetime/" target="_blank"><strong>Lovers in a Dangerous Spacetime</strong></a></li>
+        <li><a href="https://store.steampowered.com/app/1225570/Unravel_Two/" target="_blank"><strong>Unravel Two</strong></a></li>
+    </ol>
+    <li>Переход к 3D</li>
+</ul>
+<p>Также хотелось бы отметить игры с выдающимся визуальным дизайном:</p>
+<ul>
+    <li><a href="https://store.steampowered.com/app/1568400/Sheepy_A_Short_Adventure/" target="_blank"><strong>Sheepy: A Short Adventure</strong></a></li>
+    <li><a href="https://store.steampowered.com/app/1484900/Hoa/" target="_blank"><strong>Hoa</strong></a></li>
+    <li><a href="https://store.steampowered.com/app/2878220/Space_Adventure_Cobra__The_Awakening/" target="_blank"><strong>Space Adventure Cobra - The Awakening	</strong></a></li>
+    <li><a href="https://store.steampowered.com/app/268910/Cuphead/" target="_blank"><strong>Cuphead</strong></a></li>
+    <li><a href="https://store.steampowered.com/app/2254950/The_Eternal_Life_of_Goldman/" target="_blank"><strong>The Eternal Life of Goldman</strong></a></li>
+</ul>
+
+<h2 style="text-align: center; margin-top : 3em">То, что есть сейчас</h2>
+
+<div style="display: flex; justify-content: center;">
+<video controls width="1280" height="720" autoplay muted loop>
+        <source src="video.webm" type="video/webm">
+        <p>Your browser does not support this video. <a href="video.webm">Download the video</a>.</p>
+    </video>
+</div>
+
+<script>
+    // Data for genres with games and Steam URLs (all links verified)
+    const genres = [
+        {
+            name: "Action-Platformers",
+            value: 1,
+            color: "#ff6b6b",
+            games: [
+                { name: "Hollow Knight", url: "https://store.steampowered.com/app/367520/Hollow_Knight/" },
+                { name: "Ori and the Blind Forest", url: "https://store.steampowered.com/app/261570/Ori_and_the_Blind_Forest/" },
+                { name: "Ori and the Will of the Wisps", url: "https://store.steampowered.com/app/1057090/Ori_and_the_Will_of_the_Wisps/" },
+                { name: "Katana ZERO", url: "https://store.steampowered.com/app/460950/Katana_ZERO/" },
+                { name: "Nine Sols", url: "https://store.steampowered.com/app/1809540/Nine_Sols/" },
+                { name: "Shank 2", url: "https://store.steampowered.com/app/102840/Shank_2/" },
+                { name: "The Mobius Machine", url: "https://store.steampowered.com/app/2281940/The_Mobius_Machine/", dimension: "25d" },
+                { name: "Soda Crisis", url: "https://store.steampowered.com/app/1592670/Soda_Crisis/", dimension: "25d" },
+                { name: "MIO: Memories in Orbit", url: "https://store.steampowered.com/app/1672810/MIO_Memories_in_Orbit/", dimension: "25d" },
+                { name: "Prince of Persia: The Lost Crown", url: "https://store.steampowered.com/app/2751000/Prince_of_Persia_The_Lost_Crown/", dimension: "25d" }
+            ]
+        },
+        {
+            name: "Action-Platformers Multiplayer",
+            value: 1,
+            color: "#4ecdc4",
+            games: [
+                { name: "Cuphead", url: "https://store.steampowered.com/app/268910/Cuphead/" },
+                { name: "Castle Crashers", url: "https://store.steampowered.com/app/204360/Castle_Crashers/" },
+                { name: "Guns, Gore and Cannoli 1&2", url: "https://store.steampowered.com/bundle/30823/Capo_Dei_Capi/" },
+                { name: "BattleBlock Theater", url: "https://store.steampowered.com/app/238460/BattleBlock_Theater/" },
+                { name: "Broforce", url: "https://store.steampowered.com/app/274190/Broforce/" },
+                { name: "Guacamelee! 1&2", url: "https://store.steampowered.com/bundle/45249/Guacamelee_Collection/" },
+                { name: "Unruly Heroes", url: "https://store.steampowered.com/app/780350/Unruly_Heroes/" },
+                { name: "Lovers in a Dangerous Spacetime", url: "https://store.steampowered.com/app/252110/Lovers_in_a_Dangerous_Spacetime/" },
+                { name: "Unravel Two", url: "https://store.steampowered.com/app/1225570/Unravel_Two/", dimension: "25d" },
+                { name: "Nikoderiko: The Magical World", url: "https://store.steampowered.com/app/2374190/Nikoderiko_The_Magical_World__Directors_Cut/", dimension: "25d" },
+                { name: "Big Helmet Heroes", url: "https://store.steampowered.com/app/2397250/Big_Helmet_Heroes/", dimension: "3d" },
+                { name: "It Takes Two", url: "https://store.steampowered.com/app/1426210/It_Takes_Two/", dimension: "3d" },
+                { name: "Split Fiction", url: "https://store.steampowered.com/app/2001120/Split_Fiction/", dimension: "3d" }
+            ]
+        },
+        {
+            name: "Rogue-Like Platformers",
+            value: 1,
+            color: "#45b7d1",
+            games: [
+        { name: "Dead Cells", url: "https://store.steampowered.com/app/588650/Dead_Cells/" },
+                { name: "Spelunky 2", url: "https://store.steampowered.com/app/418530/Spelunky_2/" },
+                { name: "Have a Nice Death", url: "https://store.steampowered.com/app/1740720/Have_a_Nice_Death/" },
+                { name: "Skul: The Hero Slayer", url: "https://store.steampowered.com/app/1147560/Skul_The_Hero_Slayer/" }
+            ]
+        },
+        {
+            name: "Arena-Platformers",
+            value: 1,
+            color: "#96ceb4",
+            games: [
+                { name: "Move or Die", url: "https://store.steampowered.com/app/323850/Move_or_Die/" },
+                { name: "Brawlhalla", url: "https://store.steampowered.com/app/291550/Brawlhalla/" }
+            ]
+        },
+        {
+            name: "Narrative-Driven Platformers",
+            value: 1,
+            color: "#ffeead",
+            games: [
+                                { name: "Valiant Hearts: The Great War", url: "https://store.steampowered.com/app/260230/Valiant_Hearts_The_Great_War__Soldats_Inconnus__Mmoires_de_la_Grande_Guerre/" },
+                { name: "Spiritfarer®: Farewell", url: "https://store.steampowered.com/app/972660/Spiritfarer_Farewell_Edition/" },
+                { name: "The Eternal Life of Goldman", url: "https://store.steampowered.com/app/2254950/The_Eternal_Life_of_Goldman/" },
+                { name: "Journey", url: "https://store.steampowered.com/app/638230/Journey/", dimension: "3d" }
+            ]
+        },
+        {
+            name: "Puzzle-Platformers",
+            value: 1,
+            color: "#d4a5a5",
+            games: [
+                { name: "Braid", url: "https://store.steampowered.com/app/26800/Braid/" },
+                { name: "LIMBO", url: "https://store.steampowered.com/app/48000/LIMBO/" },
+                { name: "FEZ", url: "https://store.steampowered.com/app/224760/FEZ/" },
+                { name: "FAR: Lone Sails", url: "https://store.steampowered.com/app/609320/FAR_Lone_Sails/" },
+                { name: "Little Nightmares 1&2", url: "https://store.steampowered.com/bundle/25271/Little_Nightmares_I__II/" },
+                { name: "Biped", url: "https://store.steampowered.com/app/1071870/Biped/", dimension: "3d" },
+                { name: "The Plucky Squire", url: "https://store.steampowered.com/app/1627570/Otvazhnyj_pazh/", dimension: "3d" }
+            ]
+        }
+    ];
+
+    // SVG setup
+const svgContainer = document.getElementById("chart");
+const width = Math.min(window.innerWidth, 1200); // adaptive max width
+const height = width;
+    const radius = Math.min(width, height) / 2 - 10;
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+const svg = d3.select("#chart")
+.attr("viewBox", `0 0 ${width} ${height}`)
+.attr("preserveAspectRatio", "xMidYMid meet")
+.style("width", "100%")
+.style("height", "auto");
+
+    // Add gradient to center circle
+    const defs = svg.append("defs");
+    const gradient = defs.append("radialGradient")
+        .attr("id", "centerGradient")
+        .attr("cx", "50%").attr("cy", "50%").attr("r", "50%");
+    gradient.append("stop").attr("offset", "0%").attr("stop-color", "#4682b4");
+    gradient.append("stop").attr("offset", "100%").attr("stop-color", "#2a4e6c");
+
+    // Central circle for Nova-Platformer
+    svg.append("circle")
+        .attr("class", "center-circle")
+        .attr("cx", centerX)
+        .attr("cy", centerY)
+        .attr("r", radius);
+
+    // Central text with wrapping
+    const centerText = svg.append("text")
+        .attr("class", "center-text")
+        .attr("x", centerX)
+        .attr("y", centerY)
+        .text("Nova-Platform");
+
+    // Pie chart layout
+    const pie = d3.pie()
+        .value(d => d.value)
+        .sort(null);
+
+    const arc = d3.arc()
+        .innerRadius(radius * 0.4)
+        .outerRadius(radius);
+
+    // Create genre sectors with animation
+    const sectors = svg.selectAll(".genre-sector")
+        .data(pie(genres))
+        .enter()
+        .append("path")
+        .attr("class", "genre-sector")
+        .attr("fill", d => d.data.color)
+        .attr("transform", `translate(${centerX},${centerY})`)
+        .attr("data-genre", d => d.data.name)
+        .attr("d", arc)
+        .on("click", function(event, d) {
+            showModal(d.data.name, d.data.games);
+        })
+        .on("mouseover", function(event, d) {
+            d3.select(this).style("opacity", 0.8);
+        })
+        .on("mouseout", function() {
+            d3.select(this).style("opacity", 1);
+        });
+
+    // Add text labels inside sectors
+    svg.selectAll(".genre-text")
+        .data(pie(genres))
+        .enter()
+        .append("text")
+        .attr("class", "genre-text")
+        .attr("transform", d => {
+            const [x, y] = arc.centroid(d);
+            return `translate(${centerX + x}, ${centerY + y - 20})`;
+        })
+        .text(d => `${d.data.name}`)
+        .call(wrapText, 20);
+
+    // Modal functions
+    function showModal(genre, games) {
+        d3.select("#modalTitle").text(`${genre}`);
+        const gameList = d3.select("#gameList");
+        gameList.selectAll("*").remove();
+
+        gameList.selectAll("li")
+            .data(games)
+            .enter()
+            .append("li")
+            .html(d => {
+                let className = "";
+                let icon = "";
+
+                if (d.dimension === "25d") {
+                    className = "game-25d";
+                    icon = `<span class="dimension-tag" title="2.5D Game">[2.5D]</span>`;
+                } else if (d.dimension === "3d") {
+                    className = "game-3d";
+                    icon = `<span class="dimension-tag" title="3D Game">[3D]</span>`;
+                }
+
+                return `<a href="${d.url}" target="_blank" class="${className} hover:underline">${d.name}</a> ${icon}`;
+            });
+
+        d3.select("#gameModal").style("display", "flex");
+    }
+
+    function closeModal() {
+        d3.select("#gameModal").style("display", "none");
+    }
+
+    // Text wrapping function
+    function wrapText(text, width) {
+        text.each(function() {
+            const text = d3.select(this);
+            const words = text.text().split(/\s+/).reverse();
+            let word;
+            let line = [];
+            let lineNumber = 0;
+            const lineHeight = 1.1;
+            const y = text.attr("y") || 0;
+            const x = text.attr("x") || 0;
+            let tspan = text.text(null)
+                .append("tspan")
+                .attr("x", x)
+                .attr("y", y);
+
+            while (word = words.pop()) {
+                line.push(word);
+                tspan.text(line.join(" "));
+                if (tspan.node().getComputedTextLength() > width) {
+                    line.pop();
+                    tspan.text(line.join(" "));
+                    line = [word];
+                    tspan = text.append("tspan")
+                        .attr("x", x)
+                        .attr("y", y)
+                        .attr("dy", ++lineNumber * lineHeight + "em")
+                        .text(word);
+                }
+            }
+        });
+    }
+
+</script>
+</body>
+</html>
+

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>THE LAST EXIT — Карта циклов</title>
+<style>
+:root{--bg:#0b0e11;--panel:#12181d;--panel2:#182128;--line:#39464f;--muted:#82909a;--text:#e7edf0;--accent:#d7b875;--open:#91b7a0;--blocked:#b56e6e;--hidden:#68747d;--focus:#f2d99d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0%,#1a252c 0,#0b0e11 60%);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+header{padding:22px 26px 14px;border-bottom:1px solid #283239;display:flex;align-items:flex-end;justify-content:space-between;gap:18px}h1{font-size:19px;letter-spacing:.19em;margin:0;font-weight:650}header p{margin:5px 0 0;color:var(--muted);font-size:12px;letter-spacing:.08em}.tag{color:var(--accent);font-size:10px;letter-spacing:.2em;text-transform:uppercase}
+main{max-width:1500px;margin:auto;padding:18px 22px 28px}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}.cycles{display:flex;gap:7px;flex-wrap:wrap}.cycle{border:1px solid #35414a;background:#11171c;color:#aeb9bf;padding:9px 14px;border-radius:3px;cursor:pointer;font:inherit;font-size:12px;letter-spacing:.08em;transition:.15s}.cycle:hover{border-color:#82909a;color:#fff}.cycle.active{background:#d7b875;color:#171a1b;border-color:#d7b875;font-weight:700}.cycle small{opacity:.75;margin-left:5px}.toolbar-note{color:var(--muted);font-size:11px;letter-spacing:.04em}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px}.map-panel,.side-panel{background:linear-gradient(145deg,#151d23,#10161a);border:1px solid #2b363e;border-radius:5px;overflow:hidden}.map-head{padding:14px 16px;border-bottom:1px solid #29343b;display:flex;justify-content:space-between;align-items:center;gap:10px}.map-head h2{font-size:13px;margin:0;letter-spacing:.13em;font-weight:600}.map-head span{font-size:10px;color:var(--muted);letter-spacing:.12em}.map-wrap{position:relative;min-height:610px;background-image:linear-gradient(rgba(140,160,170,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(140,160,170,.035) 1px,transparent 1px);background-size:32px 32px}.map-wrap:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 35%,rgba(4,7,9,.36) 100%)}svg{width:100%;height:610px;display:block;position:relative;z-index:1}.road{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:5}.road.open{stroke:var(--open);opacity:.82}.road.blocked{stroke:var(--blocked);stroke-dasharray:8 7;opacity:.9}.road.hidden{stroke:var(--hidden);stroke-dasharray:2 8;opacity:.7}.road.secondary{stroke:#579bd6;stroke-width:4.5;opacity:.95}.road.known{stroke-width:2;opacity:.5}.node{cursor:pointer}.node circle{stroke-width:2.2;fill:#151d22;transition:.15s}.node.open circle{stroke:var(--open)}.node.blocked circle{stroke:var(--blocked)}.node.hidden circle{stroke:var(--hidden);stroke-dasharray:3 3}.node.central circle{fill:#d7b875;stroke:#f1dba8}.node.selected circle{stroke:var(--focus);stroke-width:4;filter:drop-shadow(0 0 7px #d7b875)}.node text{fill:#dbe2e5;font-size:10px;letter-spacing:.03em;paint-order:stroke;stroke:#11171b;stroke-width:3px;stroke-linejoin:round;pointer-events:none}.node .id{fill:#8c9aa2;font-size:8px}.node.hidden-node{opacity:.5}.direction{fill:#85939b;font-size:9px;letter-spacing:.18em}.map-foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:11px 15px;border-top:1px solid #29343b;color:var(--muted);font-size:10px;letter-spacing:.06em}.legend{display:flex;gap:15px;flex-wrap:wrap}.legend i{display:inline-block;width:18px;height:3px;margin:0 6px 3px 0;vertical-align:middle}.legend .l-open{background:var(--open)}.legend .l-blocked{background:var(--blocked)}.legend .l-hidden{background:var(--hidden);background-image:linear-gradient(90deg,#68747d 50%,transparent 50%);background-size:4px 3px}
+.side-panel{padding:0 15px 15px}.side-section{padding:14px 0;border-bottom:1px solid #29343b}.side-section:last-child{border:0}.eyebrow{font-size:9px;color:var(--accent);letter-spacing:.19em;text-transform:uppercase}.side-panel h3{font-size:17px;margin:6px 0 3px;font-weight:600}.side-panel p{color:#a8b3b9;font-size:12px;margin:6px 0 0}.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}.stat{background:#1a242b;padding:9px;border:1px solid #2b373f}.stat b{display:block;font-size:17px;font-weight:600}.stat span{color:var(--muted);font-size:9px;letter-spacing:.1em;text-transform:uppercase}.poi-list{display:flex;flex-direction:column;gap:5px;margin-top:10px;max-height:250px;overflow:auto}.poi-item{display:flex;justify-content:space-between;gap:8px;text-align:left;padding:7px 8px;border:1px solid transparent;background:#182127;color:#cbd4d8;cursor:pointer;font:inherit;font-size:11px}.poi-item:hover,.poi-item.active{border-color:#8e7d57;background:#202a30}.poi-item em{font-style:normal;color:#82909a;font-size:9px;white-space:nowrap}.status{display:inline-block;padding:3px 6px;border:1px solid #3b484f;color:#b7c2c8;font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-top:9px}.status.open{border-color:#52715e;color:#a7c7b0}.status.blocked{border-color:#805454;color:#d19a9a}.status.hidden{border-color:#59636b;color:#9ba6ad}.note{font-size:10px!important;color:#75838b!important;margin-top:12px!important}.mobile-hint{display:none}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.side-panel{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.side-section:first-child{grid-column:1/-1}.map-wrap{min-height:490px}svg{height:490px}}
+@media(max-width:560px){header{padding:17px 15px}main{padding:13px 10px}.toolbar{align-items:flex-start}.toolbar-note{width:100%}.cycle{padding:8px 10px}.map-head{align-items:flex-start;flex-direction:column}.map-wrap{min-height:390px}svg{height:390px}.side-panel{display:block}.mobile-hint{display:block;color:var(--muted);font-size:10px;padding:8px 14px 0}}
+
+/* Main navigation tabs */
+.main-tabs{display:flex;gap:7px;margin:0 0 16px;border-bottom:1px solid #2b363e;padding-bottom:10px}
+.main-tab{border:1px solid #35414a;background:#11171c;color:#aeb9bf;padding:10px 16px;border-radius:3px;cursor:pointer;font:inherit;font-size:11px;letter-spacing:.12em}
+.main-tab.active{background:#d7b875;color:#171a1b;border-color:#d7b875;font-weight:700}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.gdd{max-width:1120px;margin:0 auto;background:linear-gradient(145deg,#151d23,#10161a);border:1px solid #2b363e;border-radius:5px;padding:26px 30px}
+.gdd .gdd-kicker{color:var(--accent);font-size:10px;letter-spacing:.2em;text-transform:uppercase}
+.gdd h2{font-size:22px;letter-spacing:.08em;margin:7px 0 8px}
+.gdd h3{font-size:15px;letter-spacing:.08em;margin:26px 0 9px;color:#e8d5a8;text-transform:uppercase}
+.gdd h4{font-size:13px;margin:16px 0 5px;color:#dce4e7}
+.gdd p,.gdd li{color:#b8c3c9;font-size:13px;line-height:1.65}
+.gdd ul,.gdd ol{padding-left:21px}.gdd li{margin:4px 0}
+.gdd .lead{font-size:15px;color:#dce4e7;max-width:850px}
+.gdd .gdd-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+.gdd .gdd-card{background:#19232a;border:1px solid #2b373f;padding:13px 15px}
+.gdd .gdd-card b{display:block;color:#e5d3a7;font-size:11px;letter-spacing:.1em;margin-bottom:5px}
+.gdd .gdd-card p{margin:0;font-size:12px}
+.gdd table{width:100%;border-collapse:collapse;margin:12px 0 18px;font-size:12px}
+.gdd th,.gdd td{border:1px solid #344149;padding:9px 10px;text-align:left;vertical-align:top}
+.gdd th{background:#1c272e;color:#e5d3a7;font-weight:600}
+.gdd td{color:#b8c3c9}
+.gdd .callout{border-left:2px solid var(--accent);padding:9px 13px;background:#1a2329;margin:13px 0;color:#c7d0d4;font-size:12px;line-height:1.6}
+.gdd .muted{color:#84929a;font-size:11px}
+@media(max-width:650px){.gdd{padding:18px 15px}.gdd .gdd-grid{grid-template-columns:1fr}.main-tab{padding:9px 11px}}
+
+</style>
+</head>
+<body>
+
+<a class="portfolio-home-link" href="../index.html" aria-label="Back to project archive">BACK TO ARCHIVE</a>
+<style>
+.portfolio-home-link {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2147483000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 22px 17px 22px 11px;
+
+    background: rgba(15, 23, 42, 0.88);
+    color: #f1f5f9 !important;
+
+    border: 1px solid rgba(140, 150, 150, 0.45);
+    border-left: none;
+    border-radius: 0 50px 50px 0;
+
+    font: 10px Arial, sans-serif;
+    letter-spacing: 0.1em;
+    text-decoration: none !important;
+
+    writing-mode: vertical-rl;
+    white-space: nowrap;
+
+    backdrop-filter: blur(8px);
+    box-shadow: 4px 0 18px rgba(0, 0, 0, 0.2);
+
+    transition: 
+        padding 0.3s ease,
+        background 0.3s ease,
+        color 0.3s ease;
+}
+
+.portfolio-home-link:hover {
+    padding-left: 16px;
+    padding-right: 22px;
+    background: #c4f36a;
+    color: #171916 !important;
+    border-color: #c4f36a;
+}
+
+</style>
+
+<header><div><div class="tag">Interactive world map / prototype</div><h1>THE LAST EXIT</h1><p>ROAD NETWORK // CYCLE STATE VISUALIZER</p></div><div class="tag">Internal design document · v0.1</div></header>
+<main>
+ <nav class="main-tabs" aria-label="Разделы проекта">
+  <button class="main-tab active" data-tab="mapPane">КАРТА ЦИКЛОВ</button>
+  <button class="main-tab" data-tab="gddPane">GAME DESIGN DOCUMENT</button>
+ </nav>
+ <section id="mapPane" class="tab-pane active">
+ <div class="toolbar"><div class="cycles" id="cycleButtons" aria-label="Выбор цикла"></div><div class="toolbar-note">ВЫБЕРИТЕ ЦИКЛ · НАЖМИТЕ НА ТОЧКУ ИНТЕРЕСА ДЛЯ ДЕТАЛЕЙ</div></div>
+ <div class="layout">
+  <section class="map-panel"><div class="map-head"><h2 id="mapTitle">CYCLE 01 — DESERT</h2><span id="mapSubtitle">EAST ROUTE / FIRST LOOP</span></div><div class="map-wrap"><svg id="map" viewBox="0 0 900 610" role="img" aria-label="Схема дорожной сети"></svg></div><div class="map-foot"><div class="legend"><span><i class="l-open"></i>ОСНОВНОЙ МАРШРУТ</span><span><i style="background:#579bd6"></i>ВТОРОСТЕПЕННЫЙ ПУТЬ</span><span><i class="l-blocked"></i>ЗАБЛОКИРОВАНО</span><span><i class="l-hidden"></i>СКРЫТО / НЕИЗВЕСТНО</span></div><span>СИНИЕ СВЯЗИ — ПРОЕКТНЫЕ ВТОРОСТЕПЕННЫЕ ПУТИ · СХЕМА НЕ В МАСШТАБЕ</span></div><div class="mobile-hint">На узких экранах карту можно прокручивать по горизонтали.</div></section>
+  <aside class="side-panel">
+   <div class="side-section"><div class="eyebrow">Current cycle</div><h3 id="cycleName">Я УЖЕ БЫЛ ЗДЕСЬ</h3><p id="cycleDesc">Первый выезд. Восточная дорога ведёт через пустыню к старой заправке.</p><div class="stat-grid"><div class="stat"><b id="poiCount">6</b><span>Активных точек</span></div><div class="stat"><b id="roadCount">5</b><span>Связей на схеме</span></div></div></div>
+   <div class="side-section"><div class="eyebrow">Selected location</div><h3 id="selectedName">The Crossroad</h3><div class="eyebrow" id="selectedId">POI_001</div><span class="status open" id="selectedStatus">Доступно</span><p id="selectedDesc">Центральный перекрёсток. Начальная точка каждого цикла; четыре направления выхода.</p></div>
+   <div class="side-section"><div class="eyebrow">Points of interest</div><div class="poi-list" id="poiList"></div><p class="note">Список показывает только точки, задействованные в выбранном цикле. Неоткрытые ответвления могут оставаться скрытыми.</p></div>
+  </aside>
+ </div>
+
+ </section>
+ <section id="gddPane" class="tab-pane">
+  <article class="gdd">
+   <div class="gdd-kicker">THE LAST EXIT // GAME DESIGN DOCUMENT // WEB MVP</div>
+   <h2>THE LAST EXIT</h2>
+   <p class="lead">Автомобильная roguelite-игра об исследовании бесконечной дорожной сети, которая меняется после каждого цикла. Игрок пытается найти выход, постепенно понимая, что дороги связаны с происходящим в больнице.</p>
+   <div class="gdd-grid">
+    <div class="gdd-card"><b>ЖАНР</b><p>Exploration roguelite / mystery / narrative puzzle.</p></div>
+    <div class="gdd-card"><b>ФОРМАТ MVP</b><p>Веб-прототип на 6 циклов с выбором маршрутов, картой, событиями и сохранением знаний.</p></div>
+    <div class="gdd-card"><b>КЛЮЧЕВАЯ ФАНТАЗИЯ</b><p>Ты снова оказываешься на знакомом перекрёстке. Мир изменился, но некоторые детали помнят тебя.</p></div>
+    <div class="gdd-card"><b>ЦЕЛЬ ИГРОКА</b><p>Найти маршрут, которого нет на обычной карте, и выбраться из меняющейся дорожной сети.</p></div>
+   </div>
+
+   <h3>1. Концепция и видение</h3>
+   <p>THE LAST EXIT строится вокруг повторяющегося путешествия. Каждый цикл начинается на одном и том же центральном перекрёстке, но доступные дороги, найденные подсказки и состояние мира меняются. Автомобиль — инструмент исследования и управления ресурсами, а не дом и не отдельный персонаж.</p>
+   <p>Главный источник напряжения — противоречие между знакомым и невозможным: игрок узнаёт места, предметы и сообщения, но обнаруживает, что они не должны существовать или помнят события, которых ещё не было.</p>
+   <div class="callout"><b>Тон:</b> лиминальная атмосфера, пустые пространства, туман, дорожные знаки, редкие голоса по радио, повторяющиеся ориентиры и постепенное смещение реальности. Не объяснять загадку слишком рано.</div>
+
+   <h3>2. Основные принципы дизайна</h3>
+   <ol>
+    <li><b>Знание важнее добычи.</b> Физические ресурсы и предметы могут теряться, но открытия, записи и понимание дорожной сети остаются с игроком.</li>
+    <li><b>Повторение должно менять смысл.</b> Знакомые сцены возвращаются с небольшими, но значимыми изменениями.</li>
+    <li><b>Карта — стратегический инструмент.</b> Она показывает известную структуру, но не раскрывает все скрытые соединения.</li>
+    <li><b>Неопределённость должна быть честной.</b> Игрок может не знать, что находится за поворотом, но должен понимать, почему доступ к маршруту заблокирован или изменился.</li>
+    <li><b>Сюжет раскрывается через исследование.</b> Радио, окружение, найденные записи и аномалии важнее длинных объясняющих диалогов.</li>
+   </ol>
+
+   <h3>3. Игровой цикл</h3>
+   <ol>
+    <li>Игрок появляется на центральном перекрёстке и садится в автомобиль.</li>
+    <li>Получает краткую вводную сцену; повторяющиеся участки со временем можно сокращать.</li>
+    <li>Выбирает одно из четырёх направлений или ранее открытое ответвление.</li>
+    <li>Исследует точки интереса, собирает предметы, записи и подсказки.</li>
+    <li>Принимает решения о расходе топлива, использовании оборудования и продолжении маршрута.</li>
+    <li>Цикл заканчивается из-за исчерпания ресурсов, поломки, аномалии или сюжетного события.</li>
+    <li>Происходит переход через яркий свет и звуки реанимации; игрок возвращается к перекрёстку с накопленными знаниями.</li>
+   </ol>
+   <p class="muted">Целевой темп MVP: каждый цикл — до 10 минут и не более 20 значимых действий игрока.</p>
+
+   <h3>4. Автомобиль и ресурсы</h3>
+   <table>
+    <thead><tr><th>Система</th><th>Функция</th><th>Роль в геймплее</th></tr></thead>
+    <tbody>
+     <tr><td>Топливо</td><td>Ограничивает дальность поездки.</td><td>Основной таймер давления; заставляет выбирать, какие точки исследовать.</td></tr>
+     <tr><td>Двигатель</td><td>Может получать повреждения и ломаться.</td><td>Альтернативная причина завершения цикла; создаёт риск при продолжении пути.</td></tr>
+     <tr><td>Фары</td><td>Освещают дорогу и отдельные объекты.</td><td>Позволяют замечать детали и влияют на ощущение опасности.</td></tr>
+     <tr><td>Радио</td><td>Принимает передачи, шумы и голоса.</td><td>Канал повествования, подсказок и предупреждений.</td></tr>
+     <tr><td>Навигация</td><td>Отображает известную дорожную сеть.</td><td>Помогает планировать маршрут, но не гарантирует точность текущих соединений.</td></tr>
+    </tbody>
+   </table>
+   <p>Поездки могут быть представлены короткими cutscene в MVP. В расширенной версии игрок сможет управлять автомобилем на отдельных участках. Карта при этом остаётся стратегическим интерфейсом выбора маршрута.</p>
+
+   <h3>5. Карта и система Road Shifting</h3>
+   <p>Мир представлен графом: точки интереса (POI) — узлы, дороги — рёбра. После завершения цикла соединения могут изменяться. Точка может существовать в мире, но быть неизвестной игроку или недоступной в текущем состоянии.</p>
+   <table>
+    <thead><tr><th>Состояние связи</th><th>Значение</th><th>Отображение</th></tr></thead>
+    <tbody>
+     <tr><td>Open</td><td>Маршрут доступен сейчас.</td><td>Сплошная линия.</td></tr>
+     <tr><td>Blocked</td><td>Игрок знает о маршруте, но проехать нельзя.</td><td>Пунктирная линия.</td></tr>
+     <tr><td>Hidden / Unknown</td><td>Соединение ещё не обнаружено или скрыто условием.</td><td>Точечная линия либо отсутствие линии на карте.</td></tr>
+    </tbody>
+   </table>
+   <ul>
+    <li>Не показывать игроку все POI сразу: на каждом цикле активны примерно 10–15 точек или меньше.</li>
+    <li>Разделять существование POI, открытие знания о нём, текущую доступность и состояние соединений.</li>
+    <li>Знание о найденных дорогах сохраняется между циклами, даже если сами дороги перестраиваются.</li>
+    <li>Четыре направления от стартового перекрёстка фиксированы: East — Desert, North — Woods, South — Network/Tunnel, West — Coast.</li>
+    <li>Радиостанция цикла 5 — ответвление северной сети; Toll Plaza цикла 6 — ответвление южной сети. Это не новые стартовые направления.</li>
+   </ul>
+
+   <h3>6. Прогресс и сохранение</h3>
+   <div class="gdd-grid">
+    <div class="gdd-card"><b>СБРАСЫВАЕТСЯ</b><p>Топливо, состояние двигателя, временные предметы и текущая конфигурация маршрутов.</p></div>
+    <div class="gdd-card"><b>СОХРАНЯЕТСЯ</b><p>Открытые записи, найденные подсказки, известные POI, знания о маршрутах и сюжетные флаги.</p></div>
+   </div>
+   <p>Дополнительно существует скрытая переменная «Состояние пациента». Причина завершения цикла может влиять на неё, но отдельная числовая шкала игроку не показывается. Её изменения проявляются через реплики врачей, звуки монитора и финальные состояния.</p>
+
+   <h3>7. Структура шести циклов</h3>
+   <h4>Цикл 1 — «Я УЖЕ БЫЛ ЗДЕСЬ» / Desert</h4>
+   <ul>
+    <li>Первый запуск на перекрёстке; герой садится в машину и выбирает восток.</li>
+    <li>Старая заправка: карта, предохранитель и ключи.</li>
+    <li>Радио сообщает: «Пациент всё ещё не реагирует».</li>
+    <li>Знак WELCOME BACK и повтор дороги; на поваленном дереве — инициалы героя.</li>
+    <li>Топливо заканчивается. Белый свет, звук разряда и фраза: «Разряд! Давай ещё раз!»</li>
+   </ul>
+   <h4>Цикл 2 — «ЭТО УЖЕ ПРОИСХОДИЛО» / Woods</h4>
+   <ul>
+    <li>Начало повторяется, но инструкция или детали сцены уже изменились.</li>
+    <li>В лесу обнаруживается брошенная машина, похожая на автомобиль героя; внутри — фотография и кассета.</li>
+    <li>Запись: «Не ищи дорогу домой. Ищи дорогу, которой не было».</li>
+    <li>На лобовом стекле записка: «Не позволяй им остановить сердце».</li>
+    <li>Двигатель критически повреждается. Свет, сигнал монитора и команда: «Пульс падает! Дефибриллятор!»</li>
+   </ul>
+   <h4>Цикл 3 — «ДОРОГИ НЕ СУЩЕСТВУЕТ» / Tunnel</h4>
+   <ul>
+    <li>Герой осознаёт повторение и начинает цикл с намерением проверить южный маршрут.</li>
+    <li>В тоннеле появляются надписи WRONG WAY и YOU HAVE BEEN HERE.</li>
+    <li>В телефонной будке звучит голос героя: «Не выходи из машины».</li>
+    <li>Аномальная развязка с четырьмя EXIT; скрытый EXIT 03 ведёт к больничному коридору и двери ROOM 03 — EMERGENCY.</li>
+    <li>Слышны врачи: «Мы не можем его потерять». Силуэт пациента связывает дорожную реальность с больницей.</li>
+    <li>Цикл завершается; радио предупреждает не возвращаться к перекрёстку. Свет, реанимация и фраза: «Есть реакция! Он открывает глаза!»</li>
+   </ul>
+   <h4>Цикл 4 — «БЕРЕГ, КОТОРОГО НЕТ НА КАРТЕ» / Coast</h4>
+   <ul>
+    <li>Западный маршрут открывает прибрежную трассу, мотель и маяк.</li>
+    <li>В номере 17 находятся личные следы героя, не совпадающие с его воспоминаниями.</li>
+    <li>На парковке стоят машины, словно ожидающие владельцев; маяк светит в сторону дороги.</li>
+    <li>Генератор маяка становится интерактивным объектом и может менять дорожные сигналы.</li>
+    <li>Цикл усиливает личную составляющую тайны, не раскрывая окончательное объяснение.</li>
+   </ul>
+   <h4>Цикл 5 — «СИГНАЛ ИЗ НИОТКУДА» / The Signal</h4>
+   <ul>
+    <li>Из уже известной северной лесной сети открывается ответвление к сигнальной башне и радиостанции.</li>
+    <li>Радиопередачи дают фрагменты сообщений, которые могут относиться к разным моментам времени.</li>
+    <li>В комнате наблюдения игрок сопоставляет сигнал и структуру дорожных соединений.</li>
+    <li>После настройки сигнала появляется или меняется White Road.</li>
+    <li>Цикл даёт игроку новый способ читать карту, а не просто ещё одну локацию.</li>
+   </ul>
+   <h4>Цикл 6 — «ПОСЛЕДНИЙ ПРОЕЗД» / The Toll</h4>
+   <ul>
+    <li>Южная сеть открывает ответвление к платной трассе и пункту оплаты.</li>
+    <li>В журнале оператора обнаруживаются записи о проездах, датированные будущим.</li>
+    <li>Терминал экстренной связи активирует скрытый маршрут к больнице.</li>
+    <li>Игрок проходит от входа в больницу к коридору и ROOM 03; запертая дверь и обычный выход остаются проверкой накопленных знаний.</li>
+    <li>Финальная задача MVP — собрать достаточную информацию, чтобы осмысленно выбрать путь к выходу, а не просто добраться до последней точки.</li>
+   </ul>
+
+   <h3>8. Точки интереса и контент</h3>
+   <p>Каталог карты содержит около 48 записей POI, сгруппированных по зонам: Central, Desert, Woods, Network, Coast и Exit. Часть объектов повторяется или меняет состояние между циклами. EXIT 01, EXIT 02 и EXIT 04 лучше трактовать как варианты соединений от Four Exits Junction, а не как самостоятельные крупные локации.</p>
+   <p>Каждая точка интереса должна иметь: уникальный ID, название, описание, координаты на схеме, регион, условия открытия, доступность по циклам и список связанных событий/предметов.</p>
+
+   <h3>9. Сюжетная подача и звук</h3>
+   <ul>
+    <li>Повторяющиеся реплики меняются на одно-два слова или получают новый контекст.</li>
+    <li>Радио используется для коротких, легко запоминающихся сообщений, а не длинных монологов.</li>
+    <li>Переход между циклами сопровождается резким белым светом, сердечным монитором, голосами медиков и короткой командой персонала.</li>
+    <li>Не показывать больницу полностью до третьего цикла; до этого использовать только косвенные сигналы.</li>
+   </ul>
+
+   <h3>10. Объём веб-MVP</h3>
+   <table>
+    <thead><tr><th>Включить в MVP</th><th>Оставить за пределами MVP</th></tr></thead>
+    <tbody>
+     <tr><td>6 циклов; стартовый перекрёсток; четыре направления.</td><td>Большой бесшовный 3D-мир и свободное вождение по всей сети.</td></tr>
+     <tr><td>Карта-граф с переключением состояний, POI и статусами дорог.</td><td>Сложная физическая модель автомобиля и реалистичный ремонт.</td></tr>
+     <tr><td>Текстовые события, выборы, инвентарь ключевых предметов.</td><td>Полноценная симуляция всех внутренних систем машины.</td></tr>
+     <tr><td>Топливо, двигатель, радио, фары как упрощённые параметры/события.</td><td>Большое количество случайных процедурных событий.</td></tr>
+     <tr><td>Постоянные знания, флаги открытий и скрытое состояние пациента.</td><td>Финальная production-версия всех сюжетных веток.</td></tr>
+    </tbody>
+   </table>
+
+   <h3>11. Критерии готовности прототипа</h3>
+   <ul>
+    <li>Игрок может пройти все шесть циклов в заданной последовательности.</li>
+    <li>Переключение цикла корректно обновляет активные POI и дорожные связи.</li>
+    <li>Нажатие на POI показывает его ID, описание и статус.</li>
+    <li>Скрытые и заблокированные маршруты визуально отличаются от доступных.</li>
+    <li>Знания и сюжетные флаги не теряются при переходе между циклами.</li>
+    <li>Четыре исходных направления остаются неизменными; новые зоны открываются ответвлениями.</li>
+    <li>Каждый цикл содержит понятную цель, несколько открытий и ясную причину завершения.</li>
+   </ul>
+   <div class="callout"><b>Ключевой риск дизайна:</b> если Road Shifting будет менять дороги произвольно, игрок перестанет доверять карте и перестанет строить гипотезы. Изменения должны быть системными, объяснимыми задним числом и связаны с подсказками, которые игрок способен обнаружить.</div>
+   <p class="muted">Документ объединяет текущую концепцию и структуру веб-MVP. Числа, названия и события можно уточнять по мере балансировки прототипа.</p>
+  </article>
+ </section>
+
+</main>
+<script>
+const nodes={
+'001':{name:'The Crossroad',desc:'Центральный перекрёсток. Начальная точка каждого цикла; четыре направления выхода.',x:450,y:300,group:'Central'},
+'002':{name:'The Old Sign',desc:'Старый дорожный знак. Его надписи и указатели могут меняться между циклами.',x:450,y:230,group:'Central'},
+'004':{name:'The Fallen Tree',desc:'Поваленное дерево с инициалами героя. Подтверждает, что маршрут уже проходили.',x:270,y:180,group:'Central'},
+'010':{name:'Desert Highway',desc:'Восточная трасса через пустыню. Знакомый участок дороги, который повторяется.',x:610,y:300,group:'Desert'},
+'011':{name:'Old Gas Station',desc:'Старая заправка. Здесь можно найти карту, предохранитель и ключи.',x:745,y:300,group:'Desert'},
+'012':{name:'Gas Station Storage',desc:'Подсобное помещение заправки. Дополнительные предметы и следы предыдущего визита.',x:790,y:220,group:'Desert'},
+'013':{name:'Roadside Diner',desc:'Закрытое придорожное кафе. Источник записей и радиопомех.',x:735,y:405,group:'Desert'},
+'020':{name:'Forest Road',desc:'Северная дорога уходит в густой лес. Видимость ограничена.',x:450,y:165,group:'Woods'},
+'021':{name:'Abandoned Vehicle',desc:'Брошенная машина, похожая на автомобиль героя. Внутри — фотография и кассета.',x:570,y:100,group:'Woods'},
+'022':{name:'Forest Cabin',desc:'Лесная хижина. Возможное укрытие и место для изучения найденных записей.',x:350,y:80,group:'Woods'},
+'023':{name:'Fallen Tree',desc:'Другое поваленное дерево, перекрывающее часть лесной дороги.',x:300,y:140,group:'Woods'},
+'024':{name:'Forest Junction',desc:'Развилка в лесу. Отсюда позднее открывается ответвление к радиостанции.',x:450,y:70,group:'Woods'},
+'030':{name:'Underground Tunnel',desc:'Южный тоннель. На стенах появляются предупреждения WRONG WAY и YOU HAVE BEEN HERE.',x:450,y:430,group:'Network'},
+'031':{name:'Telephone Booth',desc:'Телефонная будка. Из трубки звучит голос самого героя: «Не выходи из машины».',x:315,y:470,group:'Network'},
+'032':{name:'Four Exits Junction',desc:'Аномальный перекрёсток с четырьмя EXIT. Один из маршрутов ведёт к больничной реальности.',x:450,y:525,group:'Network'},
+'033':{name:'EXIT 03',desc:'Скрытый выход. Соединение открывается после обнаружения нужных подсказок.',x:580,y:525,group:'Network'},
+'034':{name:'Emergency Corridor',desc:'Больничный коридор. Здесь слышны голоса врачей и сигналы оборудования.',x:690,y:525,group:'Network'},
+'035':{name:'Room 03 Door',desc:'Дверь палаты ROOM 03 — EMERGENCY. За ней находится пациент.',x:790,y:525,group:'Network'},
+'050':{name:'Coastal Highway',desc:'Западная прибрежная трасса. Четвёртое направление от центрального перекрёстка.',x:290,y:300,group:'Coast'},
+'051':{name:'Abandoned Motel',desc:'Заброшенный мотель. В номере 17 обнаруживаются следы предыдущего пребывания героя.',x:165,y:300,group:'Coast'},
+'052':{name:'Motel Room 17',desc:'Номер 17. Личные вещи и записи, которые не должны были здесь оказаться.',x:100,y:225,group:'Coast'},
+'053':{name:'Motel Parking',desc:'Парковка мотеля. Несколько машин стоят так, будто ждут своих владельцев.',x:110,y:380,group:'Coast'},
+'054':{name:'Old Lighthouse',desc:'Старый маяк на побережье. Свет маяка иногда указывает не на море, а на дорогу.',x:65,y:470,group:'Coast'},
+'055':{name:'Lighthouse Generator',desc:'Генератор маяка. Его запуск меняет состояние некоторых дорожных сигналов.',x:130,y:535,group:'Coast'},
+'036':{name:'Radio Station',desc:'Радиостанция. Ответвление от северной лесной сети, а не отдельный выход с перекрёстка.',x:690,y:80,group:'Network'},
+'037':{name:'Signal Junction',desc:'Развязка сигнальных дорог. Радиосигнал задаёт новый порядок соединений.',x:790,y:100,group:'Network'},
+'038':{name:'Observation Room',desc:'Комната наблюдения. Здесь можно сопоставить сигналы и увидеть структуру дорожной сети.',x:790,y:185,group:'Network'},
+'039':{name:'Signal Tower',desc:'Сигнальная башня. Источник повторяющегося сигнала, слышимого на радио.',x:620,y:35,group:'Network'},
+'040':{name:'White Road',desc:'Белая дорога. Аномальный участок, появляющийся после настройки сигнала.',x:790,y:270,group:'Network'},
+'060':{name:'Toll Road',desc:'Платная трасса. Ответвление от южной сети, ведущее к пункту контроля.',x:450,y:575,group:'Exit'},
+'061':{name:'Toll Plaza',desc:'Пункт оплаты. Шлагбаум и будка оператора блокируют дальнейший проезд.',x:320,y:575,group:'Exit'},
+'062':{name:'Operator Booth',desc:'Будка оператора. Внутри — журнал проезда с записями, датированными будущим.',x:220,y:575,group:'Exit'},
+'063':{name:'Emergency Terminal',desc:'Терминал экстренной связи. Через него можно вызвать маршрут к больнице.',x:120,y:575,group:'Exit'},
+'064':{name:'Emergency Route',desc:'Скрытый экстренный маршрут. Он соединяет дорожную сеть с больничным комплексом.',x:80,y:500,group:'Exit'},
+'065':{name:'Hospital Entrance',desc:'Вход в больницу. Граница между дорожным пространством и реанимацией.',x:80,y:420,group:'Exit'},
+'066':{name:'Hospital Corridor',desc:'Больничный коридор. Врачи обсуждают состояние пациента.',x:80,y:340,group:'Exit'},
+'067':{name:'Room 03 — Intensive Care',desc:'Палата интенсивной терапии. Центральная сюжетная точка истории.',x:80,y:260,group:'Exit'},
+'068':{name:'Locked Hospital Door',desc:'Запертая дверь. Её состояние зависит от накопленных знаний и состояния пациента.',x:165,y:190,group:'Exit'},
+'069':{name:'Ordinary Exit',desc:'Обычный выход. Может оказаться настоящим выходом или ещё одной петлёй.',x:165,y:110,group:'Exit'}
+};
+const cycles=[
+{title:'CYCLE 01 — DESERT',subtitle:'EAST ROUTE / FIRST LOOP',name:'Я УЖЕ БЫЛ ЗДЕСЬ',desc:'Первый выезд. Восточная дорога ведёт через пустыню к старой заправке.',ids:['001','002','010','011','012','013'],edges:[['001','002','open'],['002','010','open'],['010','011','open']],secondary:[['011','012'],['011','013']],blocked:[['001','020'],['001','030'],['001','050']]},
+{title:'CYCLE 02 — WOODS',subtitle:'NORTH ROUTE / REPEATED MEMORY',name:'ЭТО УЖЕ ПРОИСХОДИЛО',desc:'Северный маршрут. В лесу находится брошенная машина с фотографией и кассетой.',ids:['001','002','020','021','022','023','024'],edges:[['001','002','open'],['002','020','open'],['020','021','open'],['021','024','blocked']],secondary:[['020','022'],['020','023']],blocked:[['001','010'],['001','030'],['001','050']]},
+{title:'CYCLE 03 — THE NETWORK',subtitle:'SOUTH ROUTE / IMPOSSIBLE EXIT',name:'ДОРОГИ НЕ СУЩЕСТВУЕТ',desc:'Южный маршрут приводит к аномальному перекрёстку и скрытому выходу EXIT 03 в больницу.',ids:['001','002','030','031','032','033','034','035'],edges:[['001','002','open'],['002','030','open'],['030','032','open'],['032','033','open'],['033','034','open'],['034','035','blocked']],secondary:[['030','031']],blocked:[['001','010'],['001','020'],['001','050']]},
+{title:'CYCLE 04 — THE COAST',subtitle:'WEST ROUTE / THE MOTEL',name:'БЕРЕГ, КОТОРОГО НЕТ НА КАРТЕ',desc:'Западная прибрежная трасса ведёт к мотелю и маяку. Здесь появляются более личные следы героя.',ids:['001','002','050','051','052','053','054','055'],edges:[['001','002','open'],['002','050','open'],['050','051','open'],['053','054','blocked']],secondary:[['051','052'],['051','053'],['054','055']],blocked:[['001','010'],['001','020'],['001','030']]},
+{title:'CYCLE 05 — THE SIGNAL',subtitle:'NORTH NETWORK / RADIO STATION',name:'СИГНАЛ ИЗ НИОТКУДА',desc:'Радиостанция открывается как ответвление от уже исследованной северной лесной сети. Это не пятое направление перекрёстка.',ids:['001','002','020','024','036','037','038','039','040'],edges:[['001','002','open'],['002','020','open'],['020','024','open'],['024','036','open'],['036','037','open'],['037','038','open'],['038','040','blocked']],secondary:[['036','039']],blocked:[['001','010'],['001','030'],['001','050']]},
+{title:'CYCLE 06 — THE TOLL',subtitle:'SOUTH NETWORK / HOSPITAL ROUTE',name:'ПОСЛЕДНИЙ ПРОЕЗД',desc:'Пункт оплаты — ответвление от южной сети. Терминал открывает экстренный маршрут к больнице и ROOM 03.',ids:['001','002','030','032','060','061','062','063','064','065','066','067','068','069'],edges:[['001','002','open'],['002','030','open'],['030','032','open'],['032','060','open'],['060','061','open'],['061','062','open'],['062','063','open'],['063','064','open'],['064','065','open'],['065','066','open'],['066','067','open'],['067','068','blocked'],['068','069','hidden']],secondary:[['030','031']],blocked:[['001','010'],['001','020'],['001','050']]}
+];
+let current=0,selected='001';
+const $=id=>document.getElementById(id);
+function makeButtons(){ $('cycleButtons').innerHTML=cycles.map((c,i)=>`<button class="cycle ${i===current?'active':''}" data-cycle="${i}">ЦИКЛ ${String(i+1).padStart(2,'0')}<small>${['E','N','S','W','N+','S+'][i]}</small></button>`).join('');document.querySelectorAll('.cycle').forEach(b=>b.onclick=()=>{current=+b.dataset.cycle;selected='001';render()}) }
+function render(){const c=cycles[current];$('mapTitle').textContent=c.title;$('mapSubtitle').textContent=c.subtitle;$('cycleName').textContent=c.name;$('cycleDesc').textContent=c.desc;$('poiCount').textContent=c.ids.length;$('roadCount').textContent=c.edges.length+(c.secondary||[]).length+(c.blocked||[]).length;makeButtons();
+ const active=new Set(c.ids),edgeMap=new Map();c.edges.forEach(e=>edgeMap.set(e[0]+'-'+e[1],e[2]));
+ const allEdges=[...c.edges];(c.secondary||[]).forEach(e=>allEdges.push([e[0],e[1],'secondary']));(c.blocked||[]).forEach(e=>allEdges.push([e[0],e[1],'blocked']));
+ let out='';allEdges.forEach(([a,b,status])=>{const A=nodes[a],B=nodes[b];out+=`<line class="road ${status}" x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" />`});
+ out+=`<text class="direction" x="450" y="25" text-anchor="middle">N / NORTH</text><text class="direction" x="875" y="305" text-anchor="end">E / EAST</text><text class="direction" x="450" y="603" text-anchor="middle">S / SOUTH</text><text class="direction" x="25" y="305">W / WEST</text>`;
+ c.ids.forEach(id=>{const n=nodes[id];const status=id==='001'?'central':(c.edges.some(e=>(e[0]===id||e[1]===id)&&e[2]==='open')?'open':(c.edges.some(e=>(e[0]===id||e[1]===id)&&e[2]==='blocked')?'blocked':'hidden'));const label=n.name.length>19?n.name.slice(0,18)+'…':n.name;out+=`<g class="node ${status} ${id===selected?'selected':''}" data-id="${id}"><circle cx="${n.x}" cy="${n.y}" r="${id==='001'?11:8}"/><text x="${n.x+13}" y="${n.y-7}">${label}</text><text class="id" x="${n.x+13}" y="${n.y+7}">POI_${id}</text></g>`});
+ $('map').innerHTML=out;document.querySelectorAll('.node').forEach(el=>el.addEventListener('click',()=>{selected=el.dataset.id;renderDetails();renderMapSelection()}));
+ $('poiList').innerHTML=c.ids.map(id=>`<button class="poi-item ${id===selected?'active':''}" data-id="${id}"><span>${nodes[id].name}</span><em>${id}</em></button>`).join('');document.querySelectorAll('.poi-item').forEach(el=>el.onclick=()=>{selected=el.dataset.id;renderDetails();renderMapSelection()});renderDetails();}
+function renderMapSelection(){document.querySelectorAll('.node').forEach(el=>el.classList.toggle('selected',el.dataset.id===selected));document.querySelectorAll('.poi-item').forEach(el=>el.classList.toggle('active',el.dataset.id===selected))}
+function renderDetails(){const n=nodes[selected];$('selectedName').textContent=n.name;$('selectedId').textContent='POI_'+selected;$('selectedDesc').textContent=n.desc;const c=cycles[current];let s='hidden';if(selected==='001'||c.edges.some(e=>(e[0]===selected||e[1]===selected)&&e[2]==='open'))s='open';else if(c.edges.some(e=>(e[0]===selected||e[1]===selected)&&e[2]==='blocked'))s='blocked';const el=$('selectedStatus');el.className='status '+s;el.textContent={open:'Доступно',blocked:'Заблокировано',hidden:'Неизвестно'}[s]}
+function renderMapSelectionOnly(){renderMapSelection()}
+
+document.querySelectorAll('.main-tab').forEach(btn=>btn.addEventListener('click',()=>{
+ document.querySelectorAll('.main-tab').forEach(x=>x.classList.toggle('active',x===btn));
+ document.querySelectorAll('.tab-pane').forEach(x=>x.classList.toggle('active',x.id===btn.dataset.tab));
+}));
+
+render();
+</script>
+</body>
+</html>

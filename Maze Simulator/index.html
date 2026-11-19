@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- 🔥 Cache-Busting: Forces fresh load every time -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <script>
+        // Force hard reload on page load (bypasses cache)
+        window.addEventListener('load', () => {
+            if (performance.navigation.type === performance.navigation.TYPE_RELOAD) {
+                // Already a reload, do nothing
+            } else {
+                // Check if loaded from cache using PerformanceNavigationTiming
+                const navEntries = performance.getEntriesByType('navigation');
+                if (navEntries.length > 0 && navEntries[0].transferSize === 0) {
+                    // Loaded from cache - force hard reload
+                    window.location.reload(true);
+                }
+            }
+        });
+    </script>
+    <meta charset="UTF-8">
+    <title>Maze Game Simulator</title>
+    <script src="./js/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #0f172a;
+            color: #e2e8f0;
+            overflow: hidden;
+        }
+
+        /* UI Layout Containers */
+        .ui-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .top-left, .top-right {
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .top-left {
+            flex-direction: row;
+        }
+        .top-right {
+            align-items: flex-end;
+        }
+        .ui-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        /* Button Styles */
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+        }
+        button:hover { background: #1d4ed8; }
+        button:disabled { background: #475569; cursor: not-allowed; }
+        button.active-mode { background: #10b981; }
+
+        .tool-btn {
+            background: #334155;
+            font-size: 12px;
+            padding: 8px 12px;
+        }
+        .tool-btn:hover { background: #475569; }
+        .tool-btn.active { background: #f59e0b; color: #000; }
+
+        /* Node Styles */
+        .node circle.base {
+            stroke: #334155;
+            stroke-width: 2px;
+            fill: #1e293b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .node circle.player {
+            fill: #0ea5e9 !important;
+            stroke: #38bdf8 !important;
+            stroke-width: 3px !important;
+            filter: drop-shadow(0 0 12px #0ea5e9);
+        }
+        .node circle.goomba {
+            fill: #dc2626 !important;
+            stroke: #f87171 !important;
+            stroke-width: 3px !important;
+            filter: drop-shadow(0 0 12px #dc2626);
+        }
+        .node circle.valid-move {
+            fill: #eab308 !important;
+            stroke: #facc15 !important;
+            stroke-width: 3px !important;
+            cursor: pointer;
+            animation: breathe-yellow 1s infinite alternate ease-in-out;
+        }
+        @keyframes breathe-yellow {
+            0% { filter: drop-shadow(0 0 2px #eab308); opacity: 0.7; }
+            100% { filter: drop-shadow(0 0 15px #facc15); opacity: 1; }
+        }
+
+    .node circle.is-start {
+        stroke: #334155 !important;
+        stroke-width: 2px !important;
+        fill: #eab308; /* Yellow */
+    }
+    .node circle.is-finish {
+        stroke: #334155 !important;
+        stroke-width: 2px !important;
+        fill: #3b82f6; /* Blue */
+    }
+    .node circle.is-spawn {
+        stroke: #334155 !important;
+        stroke-width: 2px !important;
+        fill: #ef4444; /* Red */
+    }
+
+        .node circle.edit-selected {
+            stroke: #ffffff !important;
+            stroke-width: 4px !important;
+        }
+
+        /* Link Styles */
+        .link {
+            stroke: #475569;
+            stroke-width: 2px;
+            fill: none;
+            cursor: pointer;
+        }
+        .link:hover {
+            stroke: #94a3b8;
+            stroke-width: 4px;
+        }
+    svg.play-mode .link:hover {
+        stroke: #475569 !important;
+        stroke-width: 2px !important;
+        cursor: default !important;
+    }
+        .link.highlight-path {
+            stroke: #22c55e !important;
+            stroke-width: 4px !important;
+            filter: drop-shadow(0 0 5px #22c55e);
+        }
+
+        /* Scenario Panel */
+        #scenario-panel {
+            position: absolute;
+            top: 180px;
+            right: 20px;
+            width: 320px;
+            max-height: 70vh;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 15px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+        }
+        #scenario-panel h3 {
+            margin-top: 0;
+            color: #22c55e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .scenario-item {
+            background: #0f172a;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #334155;
+            transition: all 0.2s;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .scenario-item:hover {
+            border-color: #22c55e;
+            background: #162032;
+        }
+        .scenario-item.active {
+            border-color: #22c55e;
+            background: #143320;
+        }
+        .scenario-rank {
+            font-weight: bold;
+            color: #22c55e;
+            margin-right: 10px;
+        }
+        .scenario-moves {
+            color: #94a3b8;
+            font-size: 11px;
+        }
+
+        /* Overlay */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        #overlay-img {
+            width: 180px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 25px rgba(255,255,255,0.3));
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        #overlay h1 {
+            font-size: 80px;
+            margin: 0 0 20px 0;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+        }
+        #overlay p {
+            font-size: 24px;
+            color: #94a3b8;
+        }
+        .winner-text {
+            color: #22c55e;
+            text-shadow: 0 0 30px #22c55e;
+        }
+        .loser-text {
+            color: #ef4444;
+            text-shadow: 0 0 30px #ef4444;
+        }
+
+        .close-btn {
+        background: #ef4444 !important;
+        padding: 4px 10px !important;
+        font-size: 12px !important;
+        margin-left: 10px;
+    }
+    .close-btn:hover { background: #dc2626 !important; }
+
+    .edit-sidebar {
+        position: absolute;
+        top: 80px; /* Below the mode buttons */
+        left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 10;
+        pointer-events: auto;
+    }
+    .edit-sidebar .tool-btn {
+        background: #334155;
+        padding: 10px 15px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+    .edit-sidebar .tool-btn:hover {
+        background: #475569;
+    }
+    </style>
+</head>
+<body>
+
+<a class="portfolio-home-link" href="../index.html" aria-label="Back to project archive">BACK TO ARCHIVE</a>
+<style>
+.portfolio-home-link {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2147483000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 22px 17px 22px 11px;
+
+    background: rgba(15, 23, 42, 0.88);
+    color: #f1f5f9 !important;
+
+    border: 1px solid rgba(140, 150, 150, 0.45);
+    border-left: none;
+    border-radius: 0 50px 50px 0;
+
+    font: 10px Arial, sans-serif;
+    letter-spacing: 0.1em;
+    text-decoration: none !important;
+
+    writing-mode: vertical-rl;
+    white-space: nowrap;
+
+    backdrop-filter: blur(8px);
+    box-shadow: 4px 0 18px rgba(0, 0, 0, 0.2);
+
+    transition: 
+        padding 0.3s ease,
+        background 0.3s ease,
+        color 0.3s ease;
+}
+
+.portfolio-home-link:hover {
+    padding-left: 16px;
+    padding-right: 22px;
+    background: #c4f36a;
+    color: #171916 !important;
+    border-color: #c4f36a;
+}
+
+</style>
+
+<div class="ui-container">
+    <!-- LEFT TOP CORNER -->
+    <div class="top-left">
+        <!-- Mode Toggles -->
+        <button id="btn-play" class="active-mode" onclick="setMode('play')">▶ Play Mode</button>
+        <button id="btn-edit" onclick="setMode('edit')">✎ Edit Mode</button>
+    </div>
+
+    <!-- Edit-Only Sidebar (Left Side) -->
+    <div id="edit-sidebar" class="edit-sidebar" style="display: none;">
+        <button class="tool-btn" onclick="saveLevel()">Save Level</button>
+        <button class="tool-btn" onclick="loadLevel()">Load Level</button>
+    </div>
+
+    <!-- RIGHT TOP CORNER -->
+    <div class="top-right">
+        <!-- Row 1: Reset -->
+        <div class="ui-row">
+            <button id="btn-reset" onclick="handleReset()">Reset</button>
+        </div>
+
+        <!-- Row 2: Dynamic (Play = CalcBtn, Edit = Selection Status) -->
+        <div class="ui-row">
+            <button id="calcBtn" style="display:none;" onclick="calculateScenarios()">Find Top 20 Paths</button>
+            <div id="selection-status" style="display: none; font-size: 14px; font-weight: bold; color: #94a3b8;">No selection</div>
+        </div>
+
+        <!-- Row 3: Edit Toolbar (Empty in Play Mode) -->
+        <div id="edit-toolbar" class="ui-row" style="display: none;">
+            <button class="tool-btn" id="btn-set-start" onclick="toggleNodeRole('isStart')">Set Start</button>
+            <button class="tool-btn" id="btn-set-finish" onclick="toggleNodeRole('isFinish')">Set Finish</button>
+            <button class="tool-btn" id="btn-set-spawn" onclick="toggleNodeRole('isSpawn')">Set Spawn (<span id="spawn-count">0</span>/4)</button>
+            <button class="tool-btn" style="background:#ef4444;" onclick="deleteSelectedNode()">Delete Node</button>
+        </div>
+    </div>
+</div>
+
+<div id="scenario-panel">
+    <h3>
+        <span>Best Winning Paths <span id="total-found" style="font-size:12px; color:#94a3b8;"></span></span>
+        <button class="close-btn" onclick="closeScenarioPanel()">X</button>
+    </h3>
+    <div id="scenario-list"></div>
+</div>
+
+<div id="graph"></div>
+
+<div id="overlay">
+    <img id="overlay-img" src="" alt="">
+    <h1 id="overlay-title">GAME OVER</h1>
+    <p id="overlay-subtitle" style="cursor: pointer;">Click anywhere to continue</p>
+</div>
+
+<script>
+    const width = window.innerWidth, height = window.innerHeight;
+    let mode = 'play';
+    let selectedNodeId = null;
+
+    let nextNodeId = 1;
+
+    const originalStockNodes = [
+        { id: "S", x: 480, y: 58, isStart: true },
+        { id: "T1", x: 506, y: 194 },
+        { id: "T2", x: 384, y: 321 },
+        { id: "T3", x: 514, y: 432 },
+        { id: "T4", x: 643, y: 320 },
+        { id: "T5", x: 778, y: 471 },
+        { id: "N1", x: 659, y: 529 },
+        { id: "N2", x: 325, y: 472 },
+        { id: "N3", x: 439, y: 594 },
+        { id: "N4", x: 749, y: 660 },
+        { id: "N5", x: 593, y: 730 },
+        { id: "N6", x: 728, y: 827, isSpawn: true },
+        { id: "N7", x: 769, y: 958, isFinish: true }
+    ];
+
+    const originalStockLinks = [
+        { source: "S", target: "T1" },
+        { source: "T1", target: "T2" },
+        { source: "T2", target: "T3" },
+        { source: "T3", target: "T4" },
+        { source: "T4", target: "T5" },
+        { source: "T1", target: "T4" },
+        { source: "N1", target: "T5" },
+        { source: "N1", target: "T3" },
+        { source: "N2", target: "T2" },
+        { source: "N3", target: "T3" },
+        { source: "N3", target: "N2" },
+        { source: "N4", target: "T5" },
+        { source: "N4", target: "N1" },
+        { source: "N5", target: "N4" },
+        { source: "N5", target: "N3" },
+        { source: "N6", target: "N4" },
+        { source: "N6", target: "N5" },
+        { source: "N7", target: "N6" }
+    ];
+
+    // Mutable state
+    let nodes = JSON.parse(JSON.stringify(originalStockNodes));
+    let links = JSON.parse(JSON.stringify(originalStockLinks));
+
+    // Play Mode State
+    let playerPos = "S", goombaPositions = [], turn = 1, gameOver = false;
+    let restartTimeout = null, gameTick = 0;
+    let allWins = [], currentScenario = null, scenarioStep = 0, scenarioInterval = null;
+    let adj = {};
+
+    const svg = d3.select("#graph").append("svg").attr("width", width).attr("height", height);
+    svg.append("g").attr("class", "links");
+    svg.append("g").attr("class", "nodes");
+
+    svg.on("click", (event) => {
+        if (mode === 'edit' && event.target.tagName === 'svg') {
+            const [x, y] = d3.pointer(event);
+            addNode(x, y);
+        }
+    });
+
+    const simulation = d3.forceSimulation()
+        .force("link", d3.forceLink().id(d => d.id).distance(120))
+        .force("charge", d3.forceManyBody().strength(-500))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .on("tick", ticked);
+
+    function closeScenarioPanel() {
+        document.getElementById('scenario-panel').style.display = 'none';
+    }
+
+    function saveLevel() {
+        // 1. Format Nodes
+        let nodesStr = "const originalStockNodes = [\n";
+        nodes.forEach((n, i) => {
+            const isStart = n.isStart ? ", isStart: true" : "";
+            const isFinish = n.isFinish ? ", isFinish: true" : "";
+            const isSpawn = n.isSpawn ? ", isSpawn: true" : "";
+            const comma = i < nodes.length - 1 ? "," : "";
+            nodesStr += `    { id: "${n.id}", x: ${Math.round(n.x)}, y: ${Math.round(n.y)}${isStart}${isFinish}${isSpawn} }${comma}\n`;
+        });
+        nodesStr += "];\n\n";
+
+        // 2. Format Links
+        let linksStr = "const originalStockLinks = [\n";
+        links.forEach((l, i) => {
+            const s = typeof l.source === 'object' ? l.source.id : l.source;
+            const t = typeof l.target === 'object' ? l.target.id : l.target;
+            const comma = i < links.length - 1 ? "," : "";
+            linksStr += `    { source: "${s}", target: "${t}" }${comma}\n`;
+        });
+        linksStr += "];\n";
+
+        // 3. Trigger Download
+        const blob = new Blob([nodesStr + linksStr], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "level.txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function loadLevel() {
+        // 1. Create hidden file input
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".txt";
+
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const content = event.target.result;
+
+                    // 2. Strip comments to prevent parsing errors
+                    const cleanContent = content.replace(/\/\/.*$/gm, '');
+
+                    // 3. Extract arrays using Regex
+                    const nodesMatch = cleanContent.match(/originalStockNodes\s*=\s*(\[[\s\S]*?\]);/);
+                    const linksMatch = cleanContent.match(/originalStockLinks\s*=\s*(\[[\s\S]*?\]);/);
+
+                    if (!nodesMatch || !linksMatch) {
+                        throw new Error("Invalid file format. Must contain originalStockNodes and originalStockLinks arrays.");
+                    }
+
+                    // 4. Safely evaluate the array literals
+                    const parseNodes = new Function(`return ${nodesMatch[1]}`);
+                    const parseLinks = new Function(`return ${linksMatch[1]}`);
+
+                    const loadedNodes = parseNodes();
+                    const loadedLinks = parseLinks();
+
+                    if (!Array.isArray(loadedNodes) || !Array.isArray(loadedLinks)) {
+                        throw new Error("Parsed data is not an array.");
+                    }
+
+                    // 5. Apply loaded data
+                    nodes = JSON.parse(JSON.stringify(loadedNodes));
+                    links = JSON.parse(JSON.stringify(loadedLinks));
+
+                    // 6. Prevent ID collisions by finding the highest "N" number
+                    let maxId = 0;
+                    nodes.forEach(n => {
+                        const match = n.id.match(/N(\d+)/);
+                        if (match) maxId = Math.max(maxId, parseInt(match[1], 10));
+                    });
+                    nextNodeId = maxId + 1;
+
+                    // 7. Reset UI state
+                    selectedNodeId = null;
+                    updateSelectionUI();
+                    updateGraph();
+
+                    alert("Level loaded successfully!");
+                } catch (err) {
+                    console.error(err);
+                    alert("Failed to load level: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        // Trigger file explorer
+        input.click();
+    }
+    function handleReset() {
+        if (mode === 'play') {
+            resetPlayMode();
+        } else {
+            resetEditMode();
+        }
+    }
+    function resetEditMode() {
+        nodes = JSON.parse(JSON.stringify(originalStockNodes));
+        links = JSON.parse(JSON.stringify(originalStockLinks));
+        selectedNodeId = null;
+        nextNodeId = 1; // 🔥 Reset counter on level reset
+        updateSelectionUI();
+        updateGraph();
+    }
+
+    function resetPlayMode() {
+        playerPos = nodes.find(n => n.isStart).id;
+        goombaPositions = nodes.filter(n => n.isSpawn).map(n => n.id);
+        turn = 1; gameOver = false; gameTick = 0;
+        allWins = []; currentScenario = null; scenarioStep = 0;
+
+        clearInterval(scenarioInterval);
+        clearTimeout(restartTimeout);
+
+        document.getElementById('overlay').classList.remove('active');
+        document.getElementById('scenario-panel').style.display = 'none';
+        document.getElementById('calcBtn').textContent = 'Find Top 20 Paths';
+        document.getElementById('calcBtn').disabled = false;
+
+        // 🔥 FIX: Explicitly clear the green path highlights from the links
+        svg.select(".links").selectAll("line").classed("highlight-path", false);
+
+        updateStatus();
+        updatePlayVisuals();
+    }
+
+    function ticked() {
+        // 🔥 NUCLEAR FIX: Force isolated nodes to stay pinned on EVERY tick
+        nodes.forEach(n => {
+            if (n.fx != null) {
+                n.x = n.fx;
+                n.y = n.fy;
+            }
+        });
+
+        svg.select(".links").selectAll("line")
+            .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+
+        svg.select(".nodes").selectAll("g.node")
+            .attr("transform", d => `translate(${d.x},${d.y})`);
+    }
+
+    // --- MODE SWITCHING ---
+
+    function setMode(newMode) {
+        if (newMode === mode) return;
+        if (newMode === 'play' && !validateLevel()) return;
+
+        if (mode === 'play' && newMode === 'edit') {
+            resetPlayMode();
+        }
+
+        mode = newMode;
+
+        // Toggle mode button states
+        document.getElementById('btn-play').className = mode === 'play' ? 'active-mode' : '';
+        document.getElementById('btn-edit').className = mode === 'edit' ? 'active-mode' : '';
+
+        // 🔥 FIX: Toggle the edit sidebar visibility
+        document.getElementById('edit-sidebar').style.display = mode === 'edit' ? 'flex' : 'none';
+
+        // Toggle Row 2 and Row 3 in top-right
+        const calcBtn = document.getElementById('calcBtn');
+        const selectionStatus = document.getElementById('selection-status');
+        const editToolbar = document.getElementById('edit-toolbar');
+
+        if (mode === 'play') {
+            calcBtn.style.display = 'inline-block';
+            selectionStatus.style.display = 'none';
+            editToolbar.style.display = 'none';
+        } else {
+            calcBtn.style.display = 'none';
+            selectionStatus.style.display = 'block';
+            editToolbar.style.display = 'flex';
+        }
+
+        if (mode === 'edit') {
+            document.getElementById('scenario-panel').style.display = 'none';
+            clearInterval(scenarioInterval);
+        }
+
+        selectedNodeId = null;
+        updateSelectionUI();
+
+        if (mode === 'play') {
+            startPlayMode();
+        } else {
+            updateGraph();
+        }
+    }
+
+    function validateLevel() {
+        const startCount = nodes.filter(n => n.isStart).length;
+        const finishCount = nodes.filter(n => n.isFinish).length;
+        if (startCount !== 1 || finishCount !== 1) {
+            alert("Level invalid! You must have exactly one Start node and one Finish node.");
+            return false;
+        }
+        return true;
+    }
+
+    // --- EDIT MODE ---
+    function getNextNodeId() {
+        let max = 0;
+        nodes.forEach(n => {
+            const match = n.id.match(/N(\d+)/);
+            if (match) max = Math.max(max, parseInt(match[1], 10));
+        });
+        return max + 1;
+    }
+    function addNode(x, y) {
+        const newNode = {
+            id: "N" + getNextNodeId(), // 🔥 Always unique
+            x: x,
+            y: y,
+            fx: x,
+            fy: y
+        };
+        nodes.push(newNode);
+        updateGraph();
+    }
+
+    function enforceIsolatedNodePinning() {
+        nodes.forEach(n => {
+            // Check if this node is part of any link
+            const hasLink = links.some(l => {
+                const s = typeof l.source === 'object' ? l.source.id : l.source;
+                const t = typeof l.target === 'object' ? l.target.id : l.target;
+                return s === n.id || t === n.id;
+            });
+
+            if (!hasLink) {
+                // 🔥 Pin it to its current visual position so physics ignores it
+                n.fx = n.x;
+                n.fy = n.y;
+            } else {
+                // 🔥 Release it into the physics simulation
+                n.fx = null;
+                n.fy = null;
+            }
+        });
+    }
+
+    function handleEditNodeClick(event, d) {
+        if (event.defaultPrevented) return;
+        event.stopPropagation();
+
+        if (selectedNodeId === d.id) {
+            selectedNodeId = null;
+        } else if (selectedNodeId) {
+            const exists = links.some(l => {
+                const s = typeof l.source === 'object' ? l.source.id : l.source;
+                const t = typeof l.target === 'object' ? l.target.id : l.target;
+                return (s === selectedNodeId && t === d.id) || (s === d.id && t === selectedNodeId);
+            });
+            if (!exists) {
+                links.push({ source: selectedNodeId, target: d.id });
+                enforceIsolatedNodePinning(); // 🔥 FIX: Release nodes into physics now that they have a link
+            }
+            selectedNodeId = null;
+        } else {
+            selectedNodeId = d.id;
+        }
+
+        updateSelectionUI();
+        updateGraph();
+    }
+
+    function removeLink(event, d) {
+        if (mode !== 'edit') return;
+        event.preventDefault();
+        event.stopPropagation();
+        links = links.filter(l => l !== d);
+        enforceIsolatedNodePinning(); // 🔥 FIX: Re-pin nodes if they just lost their last link
+        updateGraph();
+    }
+
+    function removeNode(event, d) {
+        if (mode !== 'edit') return;
+        event.preventDefault();
+        event.stopPropagation();
+        nodes = nodes.filter(n => n.id !== d.id);
+        links = links.filter(l => {
+            const s = typeof l.source === 'object' ? l.source.id : l.source;
+            const t = typeof l.target === 'object' ? l.target.id : l.target;
+            return s !== d.id && t !== d.id;
+        });
+        if (selectedNodeId === d.id) selectedNodeId = null;
+        enforceIsolatedNodePinning(); // 🔥 FIX: Re-evaluate all remaining nodes
+        updateSelectionUI();
+        updateGraph();
+    }
+
+    function toggleNodeRole(role) {
+        if (!selectedNodeId) return;
+        const node = nodes.find(n => n.id === selectedNodeId);
+        if (!node) return;
+
+        if (role === 'isStart') { nodes.forEach(n => n.isStart = false); node.isStart = true; }
+        else if (role === 'isFinish') { nodes.forEach(n => n.isFinish = false); node.isFinish = true; }
+        else if (role === 'isSpawn') {
+            const spawnCount = nodes.filter(n => n.isSpawn).length;
+            if (node.isSpawn) node.isSpawn = false;
+            else if (spawnCount < 4) node.isSpawn = true;
+        }
+        updateSelectionUI(); updateGraph();
+    }
+
+    function deleteSelectedNode() {
+        if (selectedNodeId) {
+            const node = nodes.find(n => n.id === selectedNodeId);
+            if (node) removeNode({ preventDefault:()=>{}, stopPropagation:()=>{} }, node);
+        }
+    }
+
+    function updateSelectionUI() {
+        const status = document.getElementById('selection-status');
+        document.getElementById('spawn-count').textContent = nodes.filter(n => n.isSpawn).length;
+
+        // 🔥 FIX: Get the toolbar element
+        const toolbar = document.getElementById('edit-toolbar');
+
+        if (!selectedNodeId) {
+            status.textContent = "No selection";
+
+            // 🔥 FIX: Hide the toolbar when nothing is selected
+            toolbar.style.display = 'none';
+
+            ['btn-set-start', 'btn-set-finish', 'btn-set-spawn'].forEach(id =>
+            document.getElementById(id).classList.remove('active')
+            );
+            return;
+        }
+
+        // 🔥 FIX: Show the toolbar when a node is selected
+        toolbar.style.display = 'flex';
+
+        const node = nodes.find(n => n.id === selectedNodeId);
+        status.textContent = `Selected: ${node.id}`;
+
+        document.getElementById('btn-set-start').classList.toggle('active', !!node.isStart);
+        document.getElementById('btn-set-finish').classList.toggle('active', !!node.isFinish);
+        document.getElementById('btn-set-spawn').classList.toggle('active', !!node.isSpawn);
+    }
+
+    // --- GRAPH RENDERING ---
+
+    function updateGraph() {
+        // 1. Update Links
+        const linkSel = svg.select(".links").selectAll("line").data(links, d => {
+            const s = typeof d.source === 'object' ? d.source.id : d.source;
+            const t = typeof d.target === 'object' ? d.target.id : d.target;
+            return s + "-" + t;
+        });
+        linkSel.exit().remove();
+        const linkEnter = linkSel.enter().append("line")
+            .attr("class", "link")
+            .on("contextmenu", removeLink);
+        linkEnter.merge(linkSel);
+
+        // 2. Update Nodes
+        const nodeSel = svg.select(".nodes").selectAll("g.node").data(nodes, d => d.id);
+        nodeSel.exit().remove();
+
+        const nodeEnter = nodeSel.enter().append("g")
+            .attr("class", "node")
+            .call(d3.drag()
+            .clickDistance(5)
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended))
+            .on("click", (e, d) => mode === 'edit' ? handleEditNodeClick(e, d) : handlePlayNodeClick(e, d))
+            .on("contextmenu", removeNode);
+
+        nodeEnter.append("circle").attr("class", "base").attr("r", 20);
+
+        nodeEnter.append("image")
+            .attr("class", "door-img")
+            .attr("href", "door.png")
+            .attr("x", -35).attr("y", -45)
+            .attr("width", 70).attr("height", 90);
+
+        const icons = nodeEnter.append("g").attr("class", "icons");
+
+        icons.append("image")
+            .attr("class", "player-img")
+            .attr("href", "player.png")
+            .attr("x", -25).attr("y", -25)
+            .attr("width", 50).attr("height", 50)
+            .attr("preserveAspectRatio", "xMidYMid meet");
+
+        icons.append("image")
+            .attr("class", "goomba-img")
+            .attr("href", "goomba.png")
+            .attr("x", -25).attr("y", -25)
+            .attr("width", 50).attr("height", 50)
+            .attr("preserveAspectRatio", "xMidYMid meet");
+
+        nodeEnter.append("text")
+            .attr("class", "label")
+            .attr("dy", "0.35em")
+            .attr("text-anchor", "middle")
+            .style("pointer-events", "none")
+            .style("fill", "#ffffff")
+            .style("font-size", "12px")
+            .style("font-weight", "bold");
+
+        const nodeMerge = nodeEnter.merge(nodeSel);
+
+        // 3. Update Attributes
+        nodeMerge.select("circle")
+            .attr("class", d => {
+            let cls = "base";
+            if (d.id === selectedNodeId) cls += " edit-selected";
+            if (d.isStart) cls += " is-start";
+            if (d.isFinish) cls += " is-finish";
+            if (d.isSpawn) cls += " is-spawn";
+            return cls;
+        })
+            .attr("r", d => {
+            if (mode === 'edit') {
+                if (d.isStart || d.isFinish || d.isSpawn) return 26;
+                return 20;
+            }
+            return 20;
+        });
+
+        nodeMerge.select(".door-img").style("display", d => (mode === 'play' && d.isFinish) ? "block" : "none");
+        nodeMerge.select(".icons").style("display", "none");
+        nodeMerge.select(".label")
+            .text(d => mode === 'edit' ? d.id : '')
+            .style("display", mode === 'edit' ? "block" : "none");
+
+        // 4. Update simulation
+        simulation.nodes(nodes);
+        simulation.force("link").links(links);
+
+        // 🔥 CRITICAL: Enforce pinning BEFORE restart
+        enforceIsolatedNodePinning();
+
+        if (links.length > 0) {
+            simulation.alpha(0.3).restart(); // 🔥 Lower alpha to reduce chaos
+        } else {
+            simulation.stop();
+        }
+    }
+
+    function dragstarted(event, d) {
+        if (mode !== 'edit') return; //  FIX: Abort if in play mode
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    function dragged(event, d) {
+        if (mode !== 'edit') return; // 🔥 FIX: Abort if in play mode
+        d.fx = event.x;
+        d.fy = event.y;
+    }
+
+    function dragended(event, d) {
+        if (mode !== 'edit') return;
+        if (!event.active) simulation.alphaTarget(0);
+
+        // 🔥 FIX: Re-evaluate pinning based on the node's current link state
+        enforceIsolatedNodePinning();
+    }
+
+    // --- PLAY MODE LOGIC (UNTOUCHED CORE) ---
+
+    function startPlayMode() {
+        playerPos = nodes.find(n => n.isStart).id;
+        goombaPositions = nodes.filter(n => n.isSpawn).map(n => n.id);
+        turn = 1; gameOver = false; gameTick = 0;
+        allWins = []; currentScenario = null; scenarioStep = 0;
+
+        document.getElementById('scenario-panel').style.display = 'none';
+        document.getElementById('calcBtn').style.display = 'inline-block';
+        document.getElementById('calcBtn').textContent = 'Find Top 20 Paths';
+        document.getElementById('calcBtn').disabled = false;
+
+        // 🔥 FIX: Clear path highlights on auto-restart
+        svg.select(".links").selectAll("line").classed("highlight-path", false);
+
+        updateStatus();
+        updatePlayVisuals();
+    }
+
+    function stopPlayMode() {
+        clearInterval(scenarioInterval);
+        clearTimeout(restartTimeout);
+        document.getElementById('overlay').classList.remove('active');
+    }
+
+    function buildAdjacency() {
+        adj = {};
+        nodes.forEach(n => adj[n.id] = []);
+        links.forEach(l => {
+            const s = typeof l.source === 'object' ? l.source.id : l.source;
+            const t = typeof l.target === 'object' ? l.target.id : l.target;
+            adj[s].push(t); adj[t].push(s);
+        });
+    }
+
+    function shortestPath(start, end) {
+        const queue = [[start]], visited = new Set([start]);
+        while (queue.length > 0) {
+            const path = queue.shift(), node = path[path.length - 1];
+            if (node === end) return path;
+            const neighbors = [...adj[node]].sort();
+            for (const neighbor of neighbors) {
+                if (!visited.has(neighbor)) { visited.add(neighbor); queue.push([...path, neighbor]); }
+            }
+        }
+        return null;
+    }
+
+    function updatePlayVisuals() {
+        buildAdjacency();
+
+        // 1. Reset EVERYTHING to base state
+        svg.select(".nodes").selectAll("circle").attr("class", "base").attr("r", 20);
+
+        // 🔥 FIX: Explicitly hide icons AND labels in Play Mode
+        svg.select(".nodes").selectAll(".icons").style("display", "none");
+        svg.select(".nodes").selectAll(".label").style("display", "none");
+
+        svg.select(".nodes").selectAll(".door-img").style("display", d => d.isFinish ? "block" : "none");
+
+        // 2. Apply Player
+        const pNodes = svg.select(".nodes").selectAll("g.node").filter(d => d.id === playerPos);
+        pNodes.select("circle").attr("class", "player").attr("r", 32);
+        pNodes.select(".icons").style("display", "block");
+        pNodes.select(".player-img").style("display", "block");
+        pNodes.select(".goomba-img").style("display", "none");
+
+        // 3. Apply Goombas
+        goombaPositions.forEach(gPos => {
+            const gNodes = svg.select(".nodes").selectAll("g.node").filter(d => d.id === gPos);
+            gNodes.select("circle").attr("class", "goomba").attr("r", 32);
+            gNodes.select(".icons").style("display", "block");
+            gNodes.select(".goomba-img").style("display", "block");
+            gNodes.select(".player-img").style("display", "none");
+        });
+
+        // 4. Apply Valid Moves
+        if (!gameOver && turn % 2 === 1 && !currentScenario) {
+            adj[playerPos].forEach(move => {
+                if (move !== playerPos) {
+                    svg.select(".nodes").selectAll("g.node").filter(d => d.id === move)
+                        .select("circle").attr("class", "valid-move");
+                }
+            });
+        }
+    }
+
+    function handlePlayNodeClick(event, d) {
+        if (event.defaultPrevented || gameOver) return;
+        if (turn % 2 !== 1) return;
+        buildAdjacency();
+        if (!adj[playerPos].includes(d.id)) return;
+
+        playerPos = d.id;
+        turn++;
+        updateStatus();
+        updatePlayVisuals();
+
+        if (checkGameOver()) return;
+
+        const currentTick = ++gameTick;
+        setTimeout(() => {
+            if (gameTick !== currentTick || gameOver) return;
+            buildAdjacency();
+            goombaPositions.forEach((gPos, idx) => {
+                const path = shortestPath(gPos, playerPos);
+                if (path && path.length > 1) goombaPositions[idx] = path[1];
+            });
+            turn++;
+            updateStatus();
+            updatePlayVisuals();
+            checkGameOver();
+        }, 500);
+    }
+
+    function checkGameOver() {
+        const finishNode = nodes.find(n => n.isFinish);
+        if (playerPos === finishNode.id) { triggerEndGame(true); return true; }
+        if (goombaPositions.includes(playerPos)) { triggerEndGame(false); return true; }
+        return false;
+    }
+
+    function triggerEndGame(isWin) {
+        gameOver = true;
+        clearInterval(scenarioInterval);
+        const overlay = document.getElementById("overlay");
+        const title = document.getElementById("overlay-title");
+        const overlayImg = document.getElementById("overlay-img");
+
+        if (isWin) { title.textContent = "YOU WIN!"; title.className = "winner-text"; overlayImg.src = "win.png"; }
+        else { title.textContent = "GAME OVER"; title.className = "loser-text"; overlayImg.src = "lose.png"; }
+
+        overlay.classList.add("active");
+
+        // 🔥 FIX: Wait for a click instead of auto-restarting
+        const handleOverlayClick = () => {
+            overlay.classList.remove('active');
+            overlay.removeEventListener('click', handleOverlayClick); // Clean up listener
+            startPlayMode(); // Restart the level
+        };
+
+        // Attach the listener
+        overlay.addEventListener('click', handleOverlayClick);
+    }
+
+    function updateStatus() {
+    }
+
+    // --- SCENARIO FINDER (PRESERVED) ---
+
+    function calculateScenarios() {
+        allWins = [];
+        const btn = document.getElementById("calcBtn");
+        btn.textContent = "Calculating...";
+        btn.disabled = true;
+
+        setTimeout(() => {
+            buildAdjacency();
+
+            const startNode = nodes.find(n => n.isStart);
+            const finishNode = nodes.find(n => n.isFinish);
+            const initialGoombas = nodes.filter(n => n.isSpawn).map(n => n.id);
+
+            // 🔥 DFS with multiple goombas
+            function dfs(pPos, gPositions, path, visitedStates, depth) {
+                if (depth > 20) return;
+
+                // Check if any goomba caught the player
+                if (gPositions.includes(pPos)) return;
+
+                // Check if player reached the finish
+                if (pPos === finishNode.id) {
+                    allWins.push([...path]);
+                    return;
+                }
+
+                if (adj[pPos].includes(finishNode.id)) {
+                    // Ensure a goomba isn't currently sitting on the finish node
+                    if (!gPositions.includes(finishNode.id)) {
+                        path.push(finishNode.id);
+                        allWins.push([...path]);
+                        path.pop();
+                    }
+                    return; // Prune all other branches from this node
+                }
+
+                // Create state key from player pos + sorted goomba positions
+                const stateKey = `${pPos}-${gPositions.slice().sort().join(',')}`;
+                if (visitedStates.has(stateKey)) return;
+                visitedStates.add(stateKey);
+
+                // Try all possible player moves
+                for (let nextP of adj[pPos]) {
+                    // Don't move into a goomba's current position
+                    if (gPositions.includes(nextP)) continue;
+
+                    // 🔥 Simulate ALL goombas moving toward the player's new position
+                    const nextGPositions = gPositions.map(gPos => {
+                        const pathToP = shortestPath(gPos, nextP);
+                        if (pathToP && pathToP.length > 1) {
+                            return pathToP[1]; // Move one step closer
+                        }
+                        return gPos; // Stay put if already at destination
+                    });
+
+                    // Don't allow move if any goomba catches player on their turn
+                    if (nextGPositions.includes(nextP)) continue;
+
+                    path.push(nextP);
+                    dfs(nextP, nextGPositions, path, visitedStates, depth + 1);
+                    path.pop();
+                }
+                visitedStates.delete(stateKey);
+            }
+
+            dfs(startNode.id, initialGoombas, [startNode.id], new Set(), 0);
+
+            allWins.sort((a, b) => a.length - b.length);
+            allWins = allWins.slice(0, 20);
+            renderScenarios();
+            btn.textContent = `Found Top ${allWins.length} Paths`;
+            btn.disabled = false;
+        }, 50);
+    }
+
+    function renderScenarios() {
+        const panel = document.getElementById("scenario-panel");
+        const list = document.getElementById("scenario-list");
+        const totalFound = document.getElementById("total-found");
+        list.innerHTML = "";
+        if (allWins.length === 0) {
+            list.innerHTML = "<p style='color:#94a3b8'>No winning paths found.</p>";
+            totalFound.textContent = ""; panel.style.display = "block"; return;
+        }
+        panel.style.display = "block";
+        totalFound.textContent = `(Showing best ${allWins.length})`;
+        allWins.forEach((path, index) => {
+            const item = document.createElement("div");
+            item.className = "scenario-item";
+            item.innerHTML = `<div><span class="scenario-rank">#${index + 1}</span><span style="color:#e2e8f0">${path.join(' → ')}</span></div><div class="scenario-moves">${path.length - 1} moves</div>`;
+            item.onclick = () => playScenario(index);
+            list.appendChild(item);
+        });
+    }
+
+    function playScenario(index) {
+        resetPlayState();
+        currentScenario = allWins[index];
+        scenarioStep = 0;
+
+        document.querySelectorAll(".scenario-item").forEach(el => el.classList.remove("active"));
+        document.querySelectorAll(".scenario-item")[index].classList.add("active");
+
+        d3.selectAll(".link").classed("highlight-path", false);
+        for (let i = 0; i < currentScenario.length - 1; i++) {
+            const u = currentScenario[i], v = currentScenario[i+1];
+            d3.selectAll(".link").filter(d => {
+                const s = typeof d.source === 'object' ? d.source.id : d.source;
+                const t = typeof d.target === 'object' ? d.target.id : d.target;
+                return (s === u && t === v) || (s === v && t === u);
+            }).classed("highlight-path", true);
+        }
+
+        // 🔥 FIX: Deleted the line that tried to update the removed #status element.
+        // It was throwing a fatal error and halting execution before the interval started.
+
+        scenarioInterval = setInterval(() => {
+            if (gameOver || scenarioStep >= currentScenario.length - 1) {
+                clearInterval(scenarioInterval);
+                return;
+            }
+            const nextP = currentScenario[scenarioStep + 1];
+            handlePlayNodeClick({ defaultPrevented: false }, nodes.find(n => n.id === nextP), true);
+            scenarioStep++;
+        }, 1000);
+    }
+
+    function resetPlayState() {
+        playerPos = nodes.find(n => n.isStart).id;
+        goombaPositions = nodes.filter(n => n.isSpawn).map(n => n.id);
+        turn = 1; gameOver = false; gameTick = 0;
+        clearInterval(scenarioInterval);
+        updateStatus(); updatePlayVisuals();
+    }
+
+    // Initialize
+    updateGraph();
+    if (mode === 'play') startPlayMode();
+</script>
+</body>
+</html>
