@@ -1,0 +1,181 @@
+						Nova-Platformer
+						 (LWJGL based)
+						 
+						 
+						 
+						 
+						 
+						 
+	Action-Platformer 
+hollow knight
+dead cells
+ori dilogy
+Katana ZERO
+Nine Sols
+Shank 2
+The Mobius Machine			2.5D
+Soda Crisis				2.5D
+MIO: Memories in Orbit			2.5D
+Prince of Persia: The Lost Crown	2.5D
+
+
+	Action-Platformer Multiplayer
+cuphead
+Castle Crashers
+Guns, Gore and Cannoli 1&2
+BattleBlock Theater
+Broforce
+Guacamelee! 1&2
+Unruly Heroes
+Lovers in a Dangerous Spacetime *
+Unravel Two 				2.5D
+Nikoderiko: The Magical World		2.5D
+Big Helmet Heroes			3D
+It Takes Two				3D
+Split Fiction				3D
+
+
+	Rogue-Like Platformer
+Spelunky 2				
+Have a Nice Death			
+Skul: The Hero Slayer			
+
+
+	Arena-Platformer
+Move or Die				
+Brawlhalla				
+
+
+	Narrative-Driven Platformers
+Spiritfarer®: Farewell			
+The Eternal Life of Goldman		
+Journey					3D
+
+
+	Puzzle-Platformer
+Braid
+LIMBO
+FEZ
+FAR: Lone Sails
+Little Nightmares 1&2			2.5D
+Biped franchise				3D
+The Plucky Squire			3D
+
+
+
+
+	Outstanding visual design
+Sheepy: A Short Adventure		
+Hoa					
+Space Adventure Cobra - The Awakening	
+Cuphead
+The Eternal Life of Goldman		
+
+
+	Interesting mechanics
+Braid			
+Laika: Aged Through Blood		
+Bionic Bay
+Lovers in a Dangerous Spacetime
+Unravel Two
+
+
+				First Milestone
+
+			phase 1 - "Basic Sidescroller 2.5D platformer"
+Basic levels
+Character: movement, gravity, collision
+Camera movement
+Basic combat system: variation of low distance attacks, damage menagement
+Basic sound effects
+Basic enemies
+
+
+			phase 2 - "Character abilities extension"		
+
+Combat system extension: range attacks,
+			 defense abilities,
+			 parry (under consideration)
+			 
+Movement ability extension: dash,
+			    double jump,
+			    wall slide/hang/climb/jump,
+			    ability to use projectiles or enemies to jump of.
+			    Under consideration: teleport, harpoon
+
+
+			phase 3 - "Environment"
+Level Redactor
+Environment parallax, animations
+Environment reactions from gameplay
+Camera improvement
+Transition between levels
+
+
+
+				Second Milestone
+			
+
+
+
+				Первый этап
+
+		Фаза 1 - "Базовый сайд-скроллер 2.5D платформер"
+Базовые уровни
+Персонаж: движение, гравитация, столкновения
+Движение камеры
+Базовая боевая система: вариации атак на малых дистанциях, управление уроном
+Базовые звуковые эффекты
+Базовые враги
+
+		Фаза 2 - "Расширение возможностей персонажа"
+
+Расширение боевой системы: атаки на расстоянии,
+				защитные способности,
+				парирование (на рассмотрении)
+Расширение боевой системы:
+Расширение возможностей передвижения: рывок,
+					двойной прыжок,
+					скольжение по стенам/зависание/лазание/прыжок,
+					возможность использовать снаряды или врагов для прыжка.
+					На рассмотрении: телепорт, гарпун
+
+		Фаза 3 - "Окружение"
+Редактор уровней
+Параллакс окружения, анимация
+Реакции окружающей среды на игровой процесс
+Улучшение камеры
+Переход между уровнями
+
+				Второй этап
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,36 @@
+const originalStockNodes = [
+    { id: "S", x: 480, y: 58, isStart: true },
+    { id: "T1", x: 506, y: 194 },
+    { id: "T2", x: 384, y: 321 },
+    { id: "T3", x: 514, y: 432 },
+    { id: "T4", x: 643, y: 320 },
+    { id: "T5", x: 778, y: 471 },
+    { id: "N1", x: 659, y: 529 },
+    { id: "N2", x: 325, y: 472 },
+    { id: "N3", x: 439, y: 594 },
+    { id: "N4", x: 749, y: 660 },
+    { id: "N5", x: 593, y: 730 },
+    { id: "N6", x: 728, y: 827, isSpawn: true },
+    { id: "N7", x: 769, y: 958, isFinish: true }
+];
+
+const originalStockLinks = [
+    { source: "S", target: "T1" },
+    { source: "T1", target: "T2" },
+    { source: "T2", target: "T3" },
+    { source: "T3", target: "T4" },
+    { source: "T4", target: "T5" },
+    { source: "T1", target: "T4" },
+    { source: "N1", target: "T5" },
+    { source: "N1", target: "T3" },
+    { source: "N2", target: "T2" },
+    { source: "N3", target: "T3" },
+    { source: "N3", target: "N2" },
+    { source: "N4", target: "T5" },
+    { source: "N4", target: "N1" },
+    { source: "N5", target: "N4" },
+    { source: "N5", target: "N3" },
+    { source: "N6", target: "N4" },
+    { source: "N6", target: "N5" },
+    { source: "N7", target: "N6" }
+];
